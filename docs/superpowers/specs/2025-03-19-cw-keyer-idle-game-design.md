@@ -1,7 +1,7 @@
 # CW Keyer Idle Game - Design Specification
 
 **Date:** 2025-03-19  
-**Status:** Draft  
+**Status:** Ready for Planning  
 **Author:** Claude (via brainstorming session)
 
 ---
@@ -57,6 +57,13 @@ Three license tiers based on real amateur radio licensing:
 - Cost QSOs to represent study time/effort
 - Achievement-gated (must meet requirement first)
 - Visual: Certificate/badge display
+
+**Locked State UI:**
+- Icon: Lock emoji (🔒) or lock SVG
+- Opacity: 50% or grayscale
+- Tooltip on hover: "Requires [achievement]"
+- Button: Disabled, shows cost but grayed out
+- Unlock notification: Toast/popup when achievement met
 
 ### Factories (Auto-Generators)
 
@@ -137,6 +144,12 @@ After purchasing 10 of any factory type, unlock bulk purchase buttons:
 | **×100** | Buy 100 | Total cost for 100 |
 | **MAX** | Buy max affordable | "Buy 47 Elmers for 4,230 QSOs" |
 
+**Unaffordable Purchases:**
+- Button: Disabled state (grayed out, no hover effect)
+- Price text: Red color or strikethrough
+- Tooltip: "Need X more QSOs"
+- Visual: Lock icon overlay on factory card
+
 ---
 
 ## UI/UX Design
@@ -157,6 +170,12 @@ After purchasing 10 of any factory type, unlock bulk purchase buttons:
 - Recently purchased: Flash highlight
 
 ### Layout
+
+**Responsive Design:**
+- Desktop: Full layout as shown
+- Tablet: 2-column factory grid
+- Mobile: Single column, swipe between tabs
+- Touch: Same mouse events work (touchstart/touchend)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -380,6 +399,11 @@ Calculate QSOs earned while away:
 - [ ] Retro terminal aesthetic implemented
 - [ ] Audio controls functional
 - [ ] No console errors, runs smoothly at 60fps
+- [ ] **Accessibility:** Keyboard operable (Space/Enter to click keyer, Tab navigation)
+- [ ] **Accessibility:** Screen reader labels for all interactive elements
+- [ ] **Accessibility:** Reduced motion option (disable animations)
+- [ ] **Mobile:** Touch events work correctly on iOS/Android
+- [ ] **Mobile:** Responsive layout works on 320px+ screens
 
 ---
 

@@ -13,6 +13,7 @@ vi.mock('../../services/audio', () => ({
 
 describe('KeyerArea.vue', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
     const pinia = createPinia()
     setActivePinia(pinia)
     vi.clearAllMocks()
@@ -38,7 +39,8 @@ describe('KeyerArea.vue', () => {
     const store = useGameStore()
     
     await wrapper.trigger('mousedown')
-    await new Promise(r => setTimeout(r, 250))
+    vi.advanceTimersByTime(250)
+    await vi.runAllTimersAsync()
     await wrapper.trigger('mouseup')
     
     // Slow click = dah = 2 QSOs

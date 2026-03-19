@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Service to manage Web Audio API and play morse code tones.
  */
@@ -21,11 +19,19 @@ export class AudioService {
   init() {
     if (this.isInitialized) return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    this.context = new AudioContext();
-    this.gainNode = this.context.createGain();
-    this.gainNode.connect(this.context.destination);
-    this.gainNode.gain.setValueAtTime(0, this.context.currentTime);
-    this.isInitialized = true;
+    if (!AudioContext) {
+      console.warn('Web Audio API not supported in this browser');
+      return;
+    }
+    try {
+      this.context = new AudioContext();
+      this.gainNode = this.context.createGain();
+      this.gainNode.connect(this.context.destination);
+      this.gainNode.gain.setValueAtTime(0, this.context.currentTime);
+      this.isInitialized = true;
+    } catch (e) {
+      console.warn('Failed to initialize AudioContext:', e);
+    }
   }
 
   /**
@@ -33,6 +39,8 @@ export class AudioService {
    */
   playTone() {
     if (!this.isInitialized) this.init();
+    if (!this.context) return;
+    if (this.oscillator) return;
     
     this.oscillator = this.context.createOscillator();
     this.oscillator.type = 'sine';
@@ -49,18 +57,18 @@ export class AudioService {
    * Stops the morse code tone.
    */
   stopTone() {
-    if (!this.oscillator) return;
-    
+    if (!this.oscillator) return
+
     // Quick fade out
-    this.gainNode.gain.setTargetAtTime(0, this.context.currentTime, 0.01);
-    
-    const osc = this.oscillator;
-    this.oscillator = null;
-    
+    this.gainNode.gain.setTargetAtTime(0, this.context.currentTime, 0.01)
+
+    const osc = this.oscillator
+    this.oscillator = null
+
     setTimeout(() => {
-      osc.stop();
-      osc.disconnect();
-    }, 50);
+      osc.stop()
+      osc.disconnect()
+    }, 50)
   }
 }
 

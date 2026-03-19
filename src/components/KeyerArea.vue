@@ -60,6 +60,7 @@ const handleKeyup = (event) => {
     class="w-full h-48 border-2 border-terminal-green rounded flex items-center justify-center cursor-pointer select-none"
     role="button"
     tabindex="0"
+    aria-label="Morse code keyer. Press for dah, quick press for dit"
     @mousedown="handleDown"
     @mouseup="handleUp"
     @mouseleave="handleUp"

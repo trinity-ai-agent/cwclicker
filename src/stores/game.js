@@ -7,11 +7,12 @@ import { FACTORIES } from '../constants/factories'
  */
 export const useGameStore = defineStore('game', () => {
   /**
- * @returns {bigint} QSO value as BigInt
- */
-const qsos = ref(0n)
+   * @returns {bigint} QSO value as BigInt
+   */
+  const qsos = ref(0n)
   const licenseLevel = ref(1)
   const factoryCounts = ref({})
+  const fractionalQSOs = ref(0) // Accumulate fractional QSOs between frames
 
   /**
    * Processes a keyer tap to add QSOs.
@@ -29,10 +30,16 @@ const qsos = ref(0n)
 
   /**
    * Adds passive QSOs from factories to the total.
-   * @param {number} amount - The amount of QSOs to add (will be floored).
+   * Accumulates fractional QSOs and only adds whole numbers.
+   * @param {number} amount - The amount of QSOs to add (can be fractional).
    */
   function addPassiveQSOs(amount) {
-    qsos.value = qsos.value + BigInt(Math.floor(amount))
+    fractionalQSOs.value += amount
+    const wholeQsos = Math.floor(fractionalQSOs.value)
+    if (wholeQsos > 0) {
+      qsos.value = qsos.value + BigInt(wholeQsos)
+      fractionalQSOs.value -= wholeQsos
+    }
   }
 
   /**
@@ -125,7 +132,8 @@ const qsos = ref(0n)
       const state = {
         qsos: qsos.value.toString(),
         licenseLevel: licenseLevel.value,
-        factoryCounts: factoryCounts.value
+        factoryCounts: factoryCounts.value,
+        fractionalQSOs: fractionalQSOs.value
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -144,6 +152,7 @@ const qsos = ref(0n)
         qsos.value = BigInt(state.qsos || '0')
         licenseLevel.value = state.licenseLevel || 1
         factoryCounts.value = state.factoryCounts || {}
+        fractionalQSOs.value = state.fractionalQSOs || 0
       }
     } catch (e) {
       console.warn('Failed to load game state:', e)
@@ -171,6 +180,7 @@ const qsos = ref(0n)
     qsos,
     licenseLevel,
     factoryCounts,
+    fractionalQSOs,
     tapKeyer,
     addPassiveQSOs,
     getFactoryCost,

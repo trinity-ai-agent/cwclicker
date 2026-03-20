@@ -63,7 +63,8 @@ describe('AudioService', () => {
       const audio = new AudioService();
       audio.playTone();
       
-      expect(mockGainNode.gain.setTargetAtTime).toHaveBeenCalledWith(0.1, 0, 0.01);
+      // Default volume is 0.5, multiplied by 0.3 = 0.15
+      expect(mockGainNode.gain.setTargetAtTime).toHaveBeenCalledWith(0.15, 0, 0.01);
     });
 
     it('does not create a new oscillator if one is already playing', () => {

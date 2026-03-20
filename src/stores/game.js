@@ -13,6 +13,13 @@ export const useGameStore = defineStore('game', () => {
   const licenseLevel = ref(1)
   const factoryCounts = ref({})
   const fractionalQSOs = ref(0) // Accumulate fractional QSOs between frames
+  
+  // Audio settings
+  const audioSettings = ref({
+    volume: 0.5,
+    frequency: 600,
+    isMuted: false
+  })
 
   /**
    * Processes a keyer tap to add QSOs.
@@ -133,7 +140,8 @@ export const useGameStore = defineStore('game', () => {
         qsos: qsos.value.toString(),
         licenseLevel: licenseLevel.value,
         factoryCounts: factoryCounts.value,
-        fractionalQSOs: fractionalQSOs.value
+        fractionalQSOs: fractionalQSOs.value,
+        audioSettings: audioSettings.value
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -153,6 +161,14 @@ export const useGameStore = defineStore('game', () => {
         licenseLevel.value = state.licenseLevel || 1
         factoryCounts.value = state.factoryCounts || {}
         fractionalQSOs.value = state.fractionalQSOs || 0
+        
+        if (state.audioSettings) {
+          audioSettings.value = {
+            volume: state.audioSettings.volume ?? 0.5,
+            frequency: state.audioSettings.frequency ?? 600,
+            isMuted: state.audioSettings.isMuted ?? false
+          }
+        }
       }
     } catch (e) {
       console.warn('Failed to load game state:', e)
@@ -176,17 +192,28 @@ export const useGameStore = defineStore('game', () => {
     return total
   }
 
+  /**
+   * Updates audio settings and saves state.
+   * @param {Object} settings - The new audio settings
+   */
+  function updateAudioSettings(settings) {
+    audioSettings.value = { ...audioSettings.value, ...settings }
+    save()
+  }
+
   return {
     qsos,
     licenseLevel,
     factoryCounts,
     fractionalQSOs,
+    audioSettings,
     tapKeyer,
     addPassiveQSOs,
     getFactoryCost,
     getBulkCost,
     buyFactory,
     getTotalQSOsPerSecond,
+    updateAudioSettings,
     save,
     load
   }

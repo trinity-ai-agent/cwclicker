@@ -1,17 +1,34 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useGameStore } from './stores/game'
+import { audioService } from './services/audio'
 import StatHeader from './components/StatHeader.vue'
 import LicensePanel from './components/LicensePanel.vue'
 import KeyerArea from './components/KeyerArea.vue'
 import ClickIndicator from './components/ClickIndicator.vue'
+import AudioPanel from './components/AudioPanel.vue'
 import FactoryList from './components/FactoryList.vue'
 import GameLoop from './components/GameLoop.vue'
 
+const store = useGameStore()
 const clickIndicatorRef = ref(null)
+const audioPanelRef = ref(null)
+
+onMounted(() => {
+  // Load audio settings from store after game is loaded
+  store.load()
+  if (audioPanelRef.value && store.audioSettings) {
+    audioPanelRef.value.loadSettings(store.audioSettings)
+    // Also apply to audio service directly
+    audioService.setVolume(store.audioSettings.volume)
+    audioService.setFrequency(store.audioSettings.frequency)
+    if (store.audioSettings.isMuted) {
+      audioService.toggleMute(true)
+    }
+  }
+})
 
 const handleLicenseUpgrade = () => {
-  const store = useGameStore()
   if (store.licenseLevel === 1 && store.qsos >= 500n) {
     store.licenseLevel = 2
     store.qsos -= 500n
@@ -22,7 +39,6 @@ const handleLicenseUpgrade = () => {
 }
 
 const handleFactoryBuy = ({ factory, count }) => {
-  const store = useGameStore()
   store.buyFactory(factory.id, count)
 }
 
@@ -30,6 +46,10 @@ const handleKeyerTap = (value) => {
   if (clickIndicatorRef.value) {
     clickIndicatorRef.value.addIndicator(value)
   }
+}
+
+const handleAudioSettingsChange = (settings) => {
+  store.updateAudioSettings(settings)
 }
 </script>
 
@@ -44,6 +64,11 @@ const handleKeyerTap = (value) => {
         </div>
         <ClickIndicator ref="clickIndicatorRef" />
       </div>
+      
+      <AudioPanel 
+        ref="audioPanelRef" 
+        @settings-change="handleAudioSettingsChange" 
+      />
       
       <FactoryList @buy="handleFactoryBuy" />
     </main>

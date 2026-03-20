@@ -53,10 +53,15 @@ const handleAudioSettingsChange = (settings) => {
   store.updateAudioSettings(settings)
 }
 
-const handleRareDxActivated = (factory) => {
+const handleLotteryActivated = (factory) => {
   // Bonus is already activated in the store
   // This is just for any additional UI feedback if needed
-  console.log(`Rare DX propagation boost activated for ${factory.name}!`)
+  console.log(`Lottery boost activated for ${factory.name}!`)
+}
+
+const handleSolarStormStarted = () => {
+  // Solar storm is already activated in the store
+  console.log('Solar Storm started! All factories output reduced by 50%')
 }
 </script>
 
@@ -77,10 +82,28 @@ const handleRareDxActivated = (factory) => {
         @settings-change="handleAudioSettingsChange" 
       />
       
-      <RareDxBonus @rare-dx-activated="handleRareDxActivated" />
+      <RareDxBonus 
+        @lottery-activated="handleLotteryActivated"
+        @solar-storm-started="handleSolarStormStarted"
+      />
       
       <FactoryList @buy="handleFactoryBuy" />
     </main>
+    
+    <footer class="mt-12 pt-6 border-t border-terminal-green text-center text-sm text-gray-500">
+      <p>
+        Made with ❤️ in Macomb, MI - Inspired by 
+        <a 
+          href="https://orteil.dashnet.org/cookieclicker/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="text-terminal-green hover:text-terminal-amber transition-colors underline"
+        >
+          Cookie Clicker
+        </a>
+      </p>
+    </footer>
+    
     <GameLoop />
   </div>
 </template>

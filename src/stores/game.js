@@ -21,19 +21,36 @@ export const useGameStore = defineStore('game', () => {
     isMuted: false
   })
 
-  // Rare Dx system
-  const RARE_DX_COOLDOWN_MS = 90000 // 90 seconds
-  const RARE_DX_CHANCE = 0.05 // 5%
-  const RARE_DX_BOOST_MULTIPLIER = 7 // 7x
-  const RARE_DX_BOOST_DURATION_MS = 77000 // 77 seconds
-  const RARE_DX_BUTTON_DURATION_MS = 10000 // 10 seconds to click
+  // Lottery system
+  const LOTTERY_COOLDOWN_MS = 90000 // 90 seconds
+  const LOTTERY_CHANCE = 0.05 // 5%
+  const LOTTERY_BOOST_MULTIPLIER = 7 // 7x
+  const LOTTERY_BOOST_DURATION_MS = 77000 // 77 seconds
+  const LOTTERY_BUTTON_DURATION_MS = 10000 // 10 seconds to click
+  const SOLAR_STORM_CHANCE = 0.15 // 15% chance of negative event
+  const SOLAR_STORM_MULTIPLIER = 0.5 // 50% output reduction
+  const SOLAR_STORM_DURATION_MS = 77000 // 77 seconds
 
-  const rareDxState = ref({
+  // Random phenomena titles
+  const PHENOMENA_TITLES = [
+    'Rare DX',
+    'Tropospheric Ducting',
+    'Meteor Shower',
+    '6m Band Opening',
+    'QSO Party!',
+    'POTA POTA POTA!',
+    'FT8 Protocol'
+  ]
+
+  const lotteryState = ref({
     lastTriggerTime: 0,
     isBonusAvailable: false,
     bonusFactoryId: null,
     bonusEndTime: 0,
-    bonusAvailableEndTime: 0
+    bonusAvailableEndTime: 0,
+    phenomenonTitle: '',
+    isSolarStorm: false,
+    solarStormEndTime: 0
   })
 
   /**
@@ -50,21 +67,21 @@ export const useGameStore = defineStore('game', () => {
     }
 
     // Check for Rare DX trigger
-    checkRareDxTrigger()
+    checkLotteryTrigger()
   }
 
   /**
    * Checks if Rare DX should trigger on this click.
    */
-  function checkRareDxTrigger() {
+  function checkLotteryTrigger() {
     const now = Date.now()
 
     // Check if cooldown has passed and no bonus is currently available
-    if (rareDxState.value.isBonusAvailable) {
+    if (lotteryState.value.isBonusAvailable) {
       return
     }
 
-    if (now - rareDxState.value.lastTriggerTime < RARE_DX_COOLDOWN_MS) {
+    if (now - lotteryState.value.lastTriggerTime < LOTTERY_COOLDOWN_MS) {
       return
     }
 
@@ -75,15 +92,15 @@ export const useGameStore = defineStore('game', () => {
     }
 
     // Roll for rareDx
-    if (Math.random() < RARE_DX_CHANCE) {
-      triggerRareDx()
+    if (Math.random() < LOTTERY_CHANCE) {
+      triggerLottery()
     }
   }
 
   /**
-   * Triggers the rareDx bonus.
+   * Triggers the lottery bonus.
    */
-  function triggerRareDx() {
+  function triggerLottery() {
     const now = Date.now()
     const ownedFactoryIds = Object.entries(factoryCounts.value)
       .filter(([_, count]) => count > 0)
@@ -96,55 +113,77 @@ export const useGameStore = defineStore('game', () => {
     // Pick random factory
     const randomFactoryId = ownedFactoryIds[Math.floor(Math.random() * ownedFactoryIds.length)]
 
-    rareDxState.value = {
+    // Pick random phenomenon title
+    const randomTitle = PHENOMENA_TITLES[Math.floor(Math.random() * PHENOMENA_TITLES.length)]
+
+    lotteryState.value = {
       lastTriggerTime: now,
       isBonusAvailable: true,
       bonusFactoryId: randomFactoryId,
       bonusEndTime: 0,
-      bonusAvailableEndTime: now + RARE_DX_BUTTON_DURATION_MS
+      bonusAvailableEndTime: now + LOTTERY_BUTTON_DURATION_MS,
+      phenomenonTitle: randomTitle,
+      isSolarStorm: false,
+      solarStormEndTime: 0
     }
   }
 
   /**
-   * Activates the rareDx bonus (called when user clicks the bonus button).
-   * @returns {boolean} True if activation succeeded.
+   * Activates the lottery bonus (called when user clicks the bonus button).
+   * Has a chance to trigger Solar Storm (negative event) instead.
+   * @returns {Object} Object with success boolean and isSolarStorm flag.
    */
-  function activateRareDxBonus() {
-    if (!rareDxState.value.isBonusAvailable) {
-      return false
+  function activateLotteryBonus() {
+    if (!lotteryState.value.isBonusAvailable) {
+      return { success: false, isSolarStorm: false }
     }
 
     const now = Date.now()
 
     // Check if button is still available
-    if (now > rareDxState.value.bonusAvailableEndTime) {
-      rareDxState.value.isBonusAvailable = false
-      return false
+    if (now > lotteryState.value.bonusAvailableEndTime) {
+      lotteryState.value.isBonusAvailable = false
+      return { success: false, isSolarStorm: false }
     }
 
-    // Activate the bonus
-    rareDxState.value.isBonusAvailable = false
-    rareDxState.value.bonusEndTime = now + RARE_DX_BOOST_DURATION_MS
+    // Check for Solar Storm (negative event)
+    const isSolarStorm = Math.random() < SOLAR_STORM_CHANCE
 
-    return true
+    // Activate the bonus
+    lotteryState.value.isBonusAvailable = false
+
+    if (isSolarStorm) {
+      lotteryState.value.isSolarStorm = true
+      lotteryState.value.solarStormEndTime = now + SOLAR_STORM_DURATION_MS
+    } else {
+      lotteryState.value.bonusEndTime = now + LOTTERY_BOOST_DURATION_MS
+    }
+
+    return { success: true, isSolarStorm }
   }
 
   /**
-   * Gets the current rareDx bonus multiplier for a factory.
+   * Gets the current lottery multiplier for a factory.
+   * Handles both positive bonuses (7x for one factory) and Solar Storm (0.5x for all).
    * @param {string} factoryId - The factory ID.
-   * @returns {number} The multiplier (1 if no bonus, 7 if bonus active).
+   * @returns {number} The multiplier (1 if no effect, 7 if positive bonus, 0.5 if solar storm).
    */
-  function getRareDxMultiplier(factoryId) {
+  function getLotteryMultiplier(factoryId) {
     const now = Date.now()
 
-    // Check if bonus has expired
-    if (now > rareDxState.value.bonusEndTime) {
+    // Check for Solar Storm (affects all factories negatively)
+    if (lotteryState.value.isSolarStorm && now < lotteryState.value.solarStormEndTime) {
+      return SOLAR_STORM_MULTIPLIER
+    }
+
+    // Check if positive bonus has expired
+    if (now > lotteryState.value.bonusEndTime) {
       return 1
     }
 
     // Check if this is the boosted factory
-    if (rareDxState.value.bonusFactoryId === factoryId) {
-      return RARE_DX_BOOST_MULTIPLIER
+    if (lotteryState.value.bonusFactoryId === factoryId) {
+      return LOTTERY_BOOST_MULTIPLIER
     }
 
     return 1
@@ -257,7 +296,7 @@ export const useGameStore = defineStore('game', () => {
         factoryCounts: factoryCounts.value,
         fractionalQSOs: fractionalQSOs.value,
         audioSettings: audioSettings.value,
-        rareDxState: rareDxState.value
+        lotteryState: lotteryState.value
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -286,15 +325,18 @@ export const useGameStore = defineStore('game', () => {
           }
         }
 
-        // Restore rareDx state (check if bonus has expired)
-        if (state.rareDxState) {
+        // Restore lottery state (check if bonus/storm has expired)
+        if (state.lotteryState) {
           const now = Date.now()
-          rareDxState.value = {
-            lastTriggerTime: state.rareDxState.lastTriggerTime || 0,
-            isBonusAvailable: state.rareDxState.isBonusAvailable && now < state.rareDxState.bonusAvailableEndTime,
-            bonusFactoryId: state.rareDxState.bonusFactoryId || null,
-            bonusEndTime: state.rareDxState.bonusEndTime || 0,
-            bonusAvailableEndTime: state.rareDxState.bonusAvailableEndTime || 0
+          lotteryState.value = {
+            lastTriggerTime: state.lotteryState.lastTriggerTime || 0,
+            isBonusAvailable: state.lotteryState.isBonusAvailable && now < state.lotteryState.bonusAvailableEndTime,
+            bonusFactoryId: state.lotteryState.bonusFactoryId || null,
+            bonusEndTime: state.lotteryState.bonusEndTime || 0,
+            bonusAvailableEndTime: state.lotteryState.bonusAvailableEndTime || 0,
+            phenomenonTitle: state.lotteryState.phenomenonTitle || '',
+            isSolarStorm: state.lotteryState.isSolarStorm && now < state.lotteryState.solarStormEndTime,
+            solarStormEndTime: state.lotteryState.solarStormEndTime || 0
           }
         }
       }
@@ -314,7 +356,7 @@ export const useGameStore = defineStore('game', () => {
     for (const [factoryId, count] of Object.entries(factoryCounts.value)) {
       const factory = FACTORIES.find(f => f.id === factoryId)
       if (factory) {
-        const multiplier = getRareDxMultiplier(factoryId)
+        const multiplier = getLotteryMultiplier(factoryId)
         total += factory.qsosPerSecond * count * multiplier
       }
     }
@@ -337,7 +379,7 @@ export const useGameStore = defineStore('game', () => {
     factoryCounts,
     fractionalQSOs,
     audioSettings,
-    rareDxState,
+    lotteryState,
     tapKeyer,
     addPassiveQSOs,
     getFactoryCost,
@@ -345,8 +387,8 @@ export const useGameStore = defineStore('game', () => {
     buyFactory,
     getTotalQSOsPerSecond,
     updateAudioSettings,
-    activateRareDxBonus,
-    getRareDxMultiplier,
+    activateLotteryBonus,
+    getLotteryMultiplier,
     save,
     load
   }

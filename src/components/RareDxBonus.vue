@@ -6,7 +6,7 @@ import { FACTORIES } from '../constants/factories';
 /**
  * Emits events from the component.
  */
-const emit = defineEmits(['rare-dx-activated']);
+const emit = defineEmits(['lottery-activated', 'solar-storm-started']);
 
 const store = useGameStore();
 
@@ -31,31 +31,44 @@ onUnmounted(() => {
  * Whether a bonus button is currently available
  */
 const isBonusAvailable = computed(() => {
-  return store.rareDxState.isBonusAvailable;
+  return store.lotteryState.isBonusAvailable;
+});
+
+/**
+ * The phenomenon title to display
+ */
+const phenomenonTitle = computed(() => {
+  return store.lotteryState.phenomenonTitle || 'Rare DX';
 });
 
 /**
  * The factory that will be boosted
  */
 const boostedFactory = computed(() => {
-  if (!store.rareDxState.bonusFactoryId) {
+  if (!store.lotteryState.bonusFactoryId) {
     return null;
   }
-  return FACTORIES.find(f => f.id === store.rareDxState.bonusFactoryId);
+  return FACTORIES.find(f => f.id === store.lotteryState.bonusFactoryId);
 });
 
 /**
- * Whether a bonus is currently active
- * Also clears the boosted factory when bonus expires
+ * Whether a positive bonus is currently active
  */
 const isBonusActive = computed(() => {
-  const active = now.value < store.rareDxState.bonusEndTime;
+  const active = now.value < store.lotteryState.bonusEndTime;
   // If bonus just expired, clear the factory ID to reset the display
-  if (!active && store.rareDxState.bonusFactoryId && store.rareDxState.bonusEndTime > 0) {
-    store.rareDxState.bonusFactoryId = null;
-    store.rareDxState.bonusEndTime = 0;
+  if (!active && store.lotteryState.bonusFactoryId && store.lotteryState.bonusEndTime > 0) {
+    store.lotteryState.bonusFactoryId = null;
+    store.lotteryState.bonusEndTime = 0;
   }
   return active;
+});
+
+/**
+ * Whether Solar Storm is currently active
+ */
+const isSolarStormActive = computed(() => {
+  return store.lotteryState.isSolarStorm && now.value < store.lotteryState.solarStormEndTime;
 });
 
 /**
@@ -65,7 +78,18 @@ const bonusTimeRemaining = computed(() => {
   if (!isBonusActive.value) {
     return 0;
   }
-  const remaining = Math.ceil((store.rareDxState.bonusEndTime - now.value) / 1000);
+  const remaining = Math.ceil((store.lotteryState.bonusEndTime - now.value) / 1000);
+  return Math.max(0, remaining);
+});
+
+/**
+ * Time remaining on Solar Storm in seconds
+ */
+const solarStormTimeRemaining = computed(() => {
+  if (!isSolarStormActive.value) {
+    return 0;
+  }
+  const remaining = Math.ceil((store.lotteryState.solarStormEndTime - now.value) / 1000);
   return Math.max(0, remaining);
 });
 
@@ -73,7 +97,7 @@ const bonusTimeRemaining = computed(() => {
  * Formatted time remaining
  */
 const formattedTimeRemaining = computed(() => {
-  const seconds = bonusTimeRemaining.value;
+  const seconds = bonusTimeRemaining.value || solarStormTimeRemaining.value;
   if (seconds >= 60) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -86,9 +110,13 @@ const formattedTimeRemaining = computed(() => {
  * Handles clicking the bonus button
  */
 function handleBonusClick() {
-  const success = store.activateRareDxBonus();
-  if (success) {
-    emit('rare-dx-activated', boostedFactory.value);
+  const result = store.activateLotteryBonus();
+  if (result.success) {
+    if (result.isSolarStorm) {
+      emit('solar-storm-started');
+    } else {
+      emit('lottery-activated', boostedFactory.value);
+    }
   }
 }
 </script>
@@ -103,10 +131,13 @@ function handleBonusClick() {
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-terminal-amber font-bold mb-1">
-            RARE DX SPOTTED!
+            {{ phenomenonTitle.toUpperCase() }}!
           </p>
           <p class="text-sm text-gray-400">
             Propagation opening on {{ boostedFactory.name }}! 7x boost for 77 seconds!
+          </p>
+          <p class="text-xs text-red-400 mt-1">
+            ⚠️ 15% chance of Solar Storm (50% output reduction)
           </p>
         </div>
 
@@ -119,17 +150,17 @@ function handleBonusClick() {
       </div>
     </div>
 
-    <!-- Active Bonus Indicator -->
+    <!-- Active Positive Bonus Indicator -->
     <div
       v-if="isBonusActive && boostedFactory"
       class="border-2 border-terminal-green bg-terminal-bg p-3 rounded"
     >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <span class="text-2xl">🎰</span>
+          <span class="text-2xl">📡</span>
           <div>
             <p class="text-terminal-green font-bold">
-              {{ boostedFactory.name }}: 7x Boost Active!
+              {{ phenomenonTitle }}: {{ boostedFactory.name }} 7x Boost!
             </p>
             <p class="text-sm text-gray-400">
               Output increased from {{ boostedFactory.qsosPerSecond }}/sec to {{ (boostedFactory.qsosPerSecond * 7).toFixed(1) }}/sec
@@ -147,6 +178,38 @@ function handleBonusClick() {
         <div
           class="bg-terminal-green h-2 rounded transition-all duration-1000"
           :style="{ width: (bonusTimeRemaining / 77 * 100) + '%' }"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Solar Storm Indicator -->
+    <div
+      v-if="isSolarStormActive"
+      class="border-2 border-red-600 bg-terminal-bg p-3 rounded"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🌩️</span>
+          <div>
+            <p class="text-red-500 font-bold">
+              SOLAR STORM IN PROGRESS!
+            </p>
+            <p class="text-sm text-gray-400">
+              All factory output reduced by 50%
+            </p>
+          </div>
+        </div>
+
+        <div class="text-red-500 font-mono text-xl">
+          {{ formattedTimeRemaining }}
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="mt-2 w-full bg-gray-700 rounded h-2">
+        <div
+          class="bg-red-600 h-2 rounded transition-all duration-1000"
+          :style="{ width: (solarStormTimeRemaining / 77 * 100) + '%' }"
         ></div>
       </div>
     </div>

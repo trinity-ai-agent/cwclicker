@@ -19,7 +19,6 @@ const clickIndicatorRef = ref(null)
 const activeTab = ref('factories')
 
 const tabs = [
-  { id: 'factories', label: 'Factories' },
   { id: 'store', label: 'Store' },
   { id: 'bulk', label: 'Bulk Buy' },
   { id: 'upgrades', label: 'Upgrades' },
@@ -75,15 +74,6 @@ const availableFactories = computed(() => {
   return FACTORIES.filter(f => f.tier <= store.licenseLevel)
 })
 
-const ownedFactories = computed(() => {
-  return Object.entries(store.factoryCounts)
-    .filter(([_, count]) => count > 0)
-    .map(([id, count]) => {
-      const factory = FACTORIES.find(f => f.id === id)
-      return { ...factory, owned: count }
-    })
-})
-
 const totalFactoryCount = computed(() => {
   return Object.values(store.factoryCounts).reduce((sum, count) => sum + count, 0)
 })
@@ -129,27 +119,6 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
       
       <!-- Tab Content -->
       <div class="space-y-4">
-        <!-- Factories Tab -->
-        <div v-if="activeTab === 'factories'" class="space-y-4">
-          <div class="flex justify-between items-center px-2">
-            <h2 class="text-xl font-bold text-terminal-green">Your Factories</h2>
-            <span class="text-terminal-green">QSOs/sec: {{ store.getTotalQSOsPerSecond().toFixed(1) }}</span>
-          </div>
-          
-          <div v-if="ownedFactories.length > 0" class="space-y-4">
-            <FactoryCard
-              v-for="factory in ownedFactories"
-              :key="factory.id"
-              :factory="factory"
-              @buy="handleFactoryBuy"
-            />
-          </div>
-          <div v-else class="border-2 border-terminal-green bg-terminal-bg p-4 rounded text-center">
-            <p class="text-gray-400">No factories yet</p>
-            <p class="text-sm text-gray-500 mt-2">Buy your first factory in the Store tab!</p>
-          </div>
-        </div>
-        
         <!-- Store Tab -->
         <div v-if="activeTab === 'store'" class="space-y-4">
           <div class="flex justify-between items-center px-2">

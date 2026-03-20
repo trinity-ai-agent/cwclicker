@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { FACTORIES } from '../constants/factories'
+import { UPGRADES } from '../constants/upgrades'
 
 /**
  * Manages the game's core state and progression.
@@ -13,6 +14,7 @@ export const useGameStore = defineStore('game', () => {
   const licenseLevel = ref(1)
   const factoryCounts = ref({})
   const fractionalQSOs = ref(0) // Accumulate fractional QSOs between frames
+  const purchasedUpgrades = ref(new Set()) // Set of upgrade IDs that have been purchased
   
   // Audio settings
   const audioSettings = ref({
@@ -286,6 +288,80 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
+   * Gets available upgrades for a factory that haven't been purchased yet.
+   * @param {string} factoryId - The factory ID.
+   * @returns {Array} Array of available upgrades with their costs.
+   */
+  function getAvailableUpgrades(factoryId) {
+    const ownedCount = factoryCounts.value[factoryId] || 0
+    const factory = FACTORIES.find(f => f.id === factoryId)
+    if (!factory) return []
+
+    return UPGRADES.filter(upgrade => {
+      // Must be for this factory
+      if (upgrade.factoryId !== factoryId) return false
+      // Must meet threshold
+      if (upgrade.threshold > ownedCount) return false
+      // Must not already be purchased
+      if (purchasedUpgrades.value.has(upgrade.id)) return false
+      return true
+    })
+  }
+
+  /**
+   * Buys an upgrade and deducts QSOs.
+   * @param {string} upgradeId - The upgrade ID.
+   * @returns {boolean} True if purchase succeeded, false otherwise.
+   */
+  function buyUpgrade(upgradeId) {
+    const upgrade = UPGRADES.find(u => u.id === upgradeId)
+    if (!upgrade) {
+      console.warn(`Upgrade not found: ${upgradeId}`)
+      return false
+    }
+
+    // Check if already purchased
+    if (purchasedUpgrades.value.has(upgradeId)) {
+      return false
+    }
+
+    // Check if factory is owned
+    const ownedCount = factoryCounts.value[upgrade.factoryId] || 0
+    if (ownedCount < upgrade.threshold) {
+      return false
+    }
+
+    const cost = BigInt(upgrade.baseCost)
+
+    if (qsos.value < cost) {
+      return false
+    }
+
+    qsos.value -= cost
+    purchasedUpgrades.value.add(upgradeId)
+
+    return true
+  }
+
+  /**
+   * Gets the total upgrade multiplier for a factory.
+   * @param {string} factoryId - The factory ID.
+   * @returns {number} The multiplier (1.0 if no upgrades, 2.0, 4.0, 8.0, etc. with upgrades).
+   */
+  function getUpgradeMultiplier(factoryId) {
+    let multiplier = 1
+
+    for (const upgradeId of purchasedUpgrades.value) {
+      const upgrade = UPGRADES.find(u => u.id === upgradeId)
+      if (upgrade && upgrade.factoryId === factoryId) {
+        multiplier *= upgrade.multiplier
+      }
+    }
+
+    return multiplier
+  }
+
+  /**
    * Saves the current game state to localStorage.
    */
   function save() {
@@ -296,7 +372,8 @@ export const useGameStore = defineStore('game', () => {
         factoryCounts: factoryCounts.value,
         fractionalQSOs: fractionalQSOs.value,
         audioSettings: audioSettings.value,
-        lotteryState: lotteryState.value
+        lotteryState: lotteryState.value,
+        purchasedUpgrades: Array.from(purchasedUpgrades.value)
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -339,6 +416,11 @@ export const useGameStore = defineStore('game', () => {
             solarStormEndTime: state.lotteryState.solarStormEndTime || 0
           }
         }
+
+        // Restore purchased upgrades
+        if (state.purchasedUpgrades) {
+          purchasedUpgrades.value = new Set(state.purchasedUpgrades)
+        }
       }
     } catch (e) {
       console.warn('Failed to load game state:', e)
@@ -347,7 +429,7 @@ export const useGameStore = defineStore('game', () => {
 
   /**
    * Calculates the total QSOs per second from all owned factories.
-   * Applies rareDx bonus multipliers.
+   * Applies upgrade multipliers and lottery bonuses.
    * @returns {number} The total QSOs per second.
    */
   function getTotalQSOsPerSecond() {
@@ -356,8 +438,9 @@ export const useGameStore = defineStore('game', () => {
     for (const [factoryId, count] of Object.entries(factoryCounts.value)) {
       const factory = FACTORIES.find(f => f.id === factoryId)
       if (factory) {
-        const multiplier = getLotteryMultiplier(factoryId)
-        total += factory.qsosPerSecond * count * multiplier
+        const lotteryMultiplier = getLotteryMultiplier(factoryId)
+        const upgradeMultiplier = getUpgradeMultiplier(factoryId)
+        total += factory.qsosPerSecond * count * lotteryMultiplier * upgradeMultiplier
       }
     }
 
@@ -380,6 +463,7 @@ export const useGameStore = defineStore('game', () => {
     fractionalQSOs,
     audioSettings,
     lotteryState,
+    purchasedUpgrades,
     tapKeyer,
     addPassiveQSOs,
     getFactoryCost,
@@ -389,6 +473,9 @@ export const useGameStore = defineStore('game', () => {
     updateAudioSettings,
     activateLotteryBonus,
     getLotteryMultiplier,
+    getAvailableUpgrades,
+    buyUpgrade,
+    getUpgradeMultiplier,
     save,
     load
   }

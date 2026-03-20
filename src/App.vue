@@ -8,6 +8,7 @@ import KeyerArea from './components/KeyerArea.vue'
 import ClickIndicator from './components/ClickIndicator.vue'
 import AudioPanel from './components/AudioPanel.vue'
 import RareDxBonus from './components/RareDxBonus.vue'
+import UpgradePanel from './components/UpgradePanel.vue'
 import FactoryList from './components/FactoryList.vue'
 import GameLoop from './components/GameLoop.vue'
 
@@ -86,6 +87,8 @@ const handleSolarStormStarted = () => {
         @lottery-activated="handleLotteryActivated"
         @solar-storm-started="handleSolarStormStarted"
       />
+      
+      <UpgradePanel />
       
       <FactoryList @buy="handleFactoryBuy" />
     </main>

@@ -106,6 +106,39 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
+   * Saves the current game state to localStorage.
+   */
+  function save() {
+    try {
+      const state = {
+        qsos: qsos.value,
+        licenseLevel: licenseLevel.value,
+        factoryCounts: factoryCounts.value
+      }
+      localStorage.setItem('cw-keyer-game-state', JSON.stringify(state))
+    } catch (e) {
+      console.warn('Failed to save game state:', e)
+    }
+  }
+
+  /**
+   * Loads the game state from localStorage.
+   */
+  function load() {
+    try {
+      const saved = localStorage.getItem('cw-keyer-game-state')
+      if (saved) {
+        const state = JSON.parse(saved)
+        qsos.value = state.qsos || 0
+        licenseLevel.value = state.licenseLevel || 1
+        factoryCounts.value = state.factoryCounts || {}
+      }
+    } catch (e) {
+      console.warn('Failed to load game state:', e)
+    }
+  }
+
+  /**
    * Calculates the total QSOs per second from all owned factories.
    * @returns {number} The total QSOs per second.
    */
@@ -130,6 +163,8 @@ export const useGameStore = defineStore('game', () => {
     getFactoryCost,
     getBulkCost,
     buyFactory,
-    getTotalQSOsPerSecond
+    getTotalQSOsPerSecond,
+    save,
+    load
   }
 })

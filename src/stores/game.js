@@ -6,7 +6,10 @@ import { FACTORIES } from '../constants/factories'
  * Manages the game's core state and progression.
  */
 export const useGameStore = defineStore('game', () => {
-  const qsos = ref(0)
+  /**
+ * @returns {bigint} QSO value as BigInt
+ */
+const qsos = ref(0n)
   const licenseLevel = ref(1)
   const factoryCounts = ref({})
 
@@ -16,9 +19,9 @@ export const useGameStore = defineStore('game', () => {
    */
   function tapKeyer(type) {
     if (type === 'dit') {
-      qsos.value += 1
+      qsos.value += 1n
     } else if (type === 'dah') {
-      qsos.value += 2
+      qsos.value += 2n
     } else {
       console.warn(`Invalid keyer tap type: ${type}`)
     }
@@ -95,11 +98,11 @@ export const useGameStore = defineStore('game', () => {
     
     const cost = getBulkCost(factoryId, count)
     
-    if (qsos.value < cost) {
+    if (qsos.value < BigInt(Math.floor(cost))) {
       return false
     }
     
-    qsos.value -= cost
+    qsos.value -= BigInt(Math.floor(cost))
     factoryCounts.value[factoryId] = (factoryCounts.value[factoryId] || 0) + count
     
     return true
@@ -111,11 +114,11 @@ export const useGameStore = defineStore('game', () => {
   function save() {
     try {
       const state = {
-        qsos: qsos.value,
+        qsos: qsos.value.toString(),
         licenseLevel: licenseLevel.value,
         factoryCounts: factoryCounts.value
       }
-      localStorage.setItem('cw-keyer-game-state', JSON.stringify(state))
+      localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
       console.warn('Failed to save game state:', e)
     }
@@ -126,10 +129,10 @@ export const useGameStore = defineStore('game', () => {
    */
   function load() {
     try {
-      const saved = localStorage.getItem('cw-keyer-game-state')
+      const saved = localStorage.getItem('cw-keyer-game')
       if (saved) {
         const state = JSON.parse(saved)
-        qsos.value = state.qsos || 0
+        qsos.value = BigInt(state.qsos || '0')
         licenseLevel.value = state.licenseLevel || 1
         factoryCounts.value = state.factoryCounts || {}
       }

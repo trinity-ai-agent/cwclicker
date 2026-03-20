@@ -31,7 +31,7 @@ const currentCost = computed(() => {
  * Determines if the user can afford this factory.
  */
 const canAfford = computed(() => {
-  return store.qsos >= currentCost.value
+  return store.qsos >= BigInt(Math.floor(currentCost.value))
 })
 
 /**

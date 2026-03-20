@@ -20,7 +20,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('shows 4 buttons when multiBuyAvailable is true', () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: (id, count) => count * 10 * 0.95
@@ -39,7 +39,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('hidden when multiBuyAvailable is false', () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: () => 95
@@ -57,7 +57,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('shows correct costs for each button', () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: (id, count) => count * 10 * 0.95
@@ -78,7 +78,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('emits buy event with count 1 on x1 button click', async () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: () => 95
@@ -100,7 +100,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('emits buy event with count 10 on x10 button click', async () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: () => 95
@@ -122,7 +122,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('emits buy event with count 100 on x100 button click', async () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: () => 95
@@ -145,7 +145,7 @@ describe('MultiBuyPanel.vue', () => {
   it('MAX button calculates correctly and emits buy event', async () => {
     // With 1000 QSOs and cost of 10 each, can afford 100
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: () => 950
@@ -167,7 +167,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('disables buttons when cannot afford', () => {
     useGameStore.mockReturnValue({
-      qsos: 5, // Can't afford any
+      qsos: 5n, // Can't afford any
       factoryCounts: {},
       getFactoryCost: () => 10,
       getBulkCost: () => 95
@@ -188,7 +188,7 @@ describe('MultiBuyPanel.vue', () => {
 
   it('MAX button shows correct max count', () => {
     useGameStore.mockReturnValue({
-      qsos: 500,
+      qsos: 500n,
       factoryCounts: {},
       getFactoryCost: (id, owned) => 10, // Fixed cost for simplicity
       getBulkCost: () => 950

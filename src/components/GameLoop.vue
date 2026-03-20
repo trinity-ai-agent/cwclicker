@@ -16,7 +16,7 @@ function gameLoop(currentTime) {
   const qsosToAdd = qsosPerSecond * deltaTime
   
   if (qsosToAdd > 0) {
-    store.qsos += Math.floor(qsosToAdd)
+    store.qsos += BigInt(Math.floor(qsosToAdd))
   }
   
   saveTimer += deltaTime

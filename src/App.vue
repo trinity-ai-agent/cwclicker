@@ -8,10 +8,12 @@ import GameLoop from './components/GameLoop.vue'
 
 const handleLicenseUpgrade = () => {
   const store = useGameStore()
-  if (store.licenseLevel === 1 && BigInt(store.qsos) >= 500n) {
+  if (store.licenseLevel === 1 && store.qsos >= 500n) {
     store.licenseLevel = 2
-  } else if (store.licenseLevel === 2 && BigInt(store.qsos) >= 5000n) {
+    store.qsos -= 500n
+  } else if (store.licenseLevel === 2 && store.qsos >= 5000n) {
     store.licenseLevel = 3
+    store.qsos -= 5000n
   }
 }
 

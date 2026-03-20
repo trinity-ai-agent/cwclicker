@@ -48,7 +48,7 @@ describe('GameLoop.vue', () => {
     }
 
     mockStore = {
-      qsos: 0,
+      qsos: 0n,
       getTotalQSOsPerSecond: vi.fn().mockReturnValue(0),
       save: vi.fn()
     }
@@ -77,7 +77,7 @@ describe('GameLoop.vue', () => {
     window.__triggerRAF(100)
     
     // Should add 10 QSOs/sec * 0.1 sec = 1 QSO
-    expect(mockStore.qsos).toBe(1)
+    expect(mockStore.qsos).toBe(1n)
   })
 
   it('accumulates QSOs over multiple frames', () => {
@@ -133,7 +133,7 @@ describe('GameLoop.vue', () => {
     window.__triggerRAF(16.67)
     
     // 60 QSOs/sec * 0.01667 sec = 1 QSO
-    expect(mockStore.qsos).toBe(1)
+    expect(mockStore.qsos).toBe(1n)
   })
 
   it('does not add QSOs when factory production is zero', () => {
@@ -143,7 +143,7 @@ describe('GameLoop.vue', () => {
     
     window.__triggerRAF(1000)
     
-    expect(mockStore.qsos).toBe(0)
+    expect(mockStore.qsos).toBe(0n)
   })
 
   it('handles variable frame rates correctly', () => {
@@ -154,12 +154,12 @@ describe('GameLoop.vue', () => {
     // Slow frame (33.33ms - 30fps)
     window.__triggerRAF(33.33)
     // 100 * 0.03333 = 3.333 -> 3 QSOs
-    expect(mockStore.qsos).toBe(3)
+    expect(mockStore.qsos).toBe(3n)
     
     // Fast frame (16.67ms later - 60fps)
     window.__triggerRAF(50)
     // Delta: 16.67ms, 100 * 0.01667 = 1.667 -> 1 QSO
     // Total: 3 + 1 = 4
-    expect(mockStore.qsos).toBe(4)
+    expect(mockStore.qsos).toBe(4n)
   })
 })

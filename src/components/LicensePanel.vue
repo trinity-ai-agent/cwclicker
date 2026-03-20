@@ -22,8 +22,8 @@ const LICENSE_NAMES = {
  * QSO requirements for each license upgrade.
  */
 const LICENSE_COSTS = {
-  1: 500,
-  2: 5000
+  1: 500n,
+  2: 5000n
 }
 
 /**
@@ -57,7 +57,10 @@ const progressPercentage = computed(() => {
   if (!nextLicenseCost.value) {
     return 100
   }
-  return Math.min((store.qsos / nextLicenseCost.value) * 100, 100)
+  // Convert BigInt to Number for percentage calculation (safe for reasonable values)
+  const qsosNum = Number(store.qsos)
+  const costNum = Number(nextLicenseCost.value)
+  return Math.min((qsosNum / costNum) * 100, 100)
 })
 
 /**

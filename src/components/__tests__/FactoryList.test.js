@@ -17,7 +17,7 @@ describe('FactoryList.vue', () => {
 
   it('renders all factories for current license tier', () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       licenseLevel: 2,
       factoryCounts: {},
       getFactoryCost: () => 10,
@@ -38,7 +38,7 @@ describe('FactoryList.vue', () => {
 
   it('filters out factories above license tier', () => {
     useGameStore.mockReturnValue({
-      qsos: 10000,
+      qsos: 10000n,
       licenseLevel: 1,
       factoryCounts: {},
       getFactoryCost: () => 10,
@@ -57,7 +57,7 @@ describe('FactoryList.vue', () => {
 
   it('shows total QSOs per second', () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       licenseLevel: 1,
       factoryCounts: { 'elmer': 2, 'straight-key': 1 },
       getFactoryCost: () => 10,
@@ -72,7 +72,7 @@ describe('FactoryList.vue', () => {
 
   it('shows MultiBuyPanel when 10+ total factories owned', () => {
     useGameStore.mockReturnValue({
-      qsos: 10000,
+      qsos: 10000n,
       licenseLevel: 2,
       factoryCounts: { 'elmer': 5, 'straight-key': 5 },
       getFactoryCost: () => 10,
@@ -89,7 +89,7 @@ describe('FactoryList.vue', () => {
 
   it('hides MultiBuyPanel when less than 10 factories owned', () => {
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       licenseLevel: 2,
       factoryCounts: { 'elmer': 3, 'straight-key': 2 },
       getFactoryCost: () => 10,
@@ -105,7 +105,7 @@ describe('FactoryList.vue', () => {
   it('handles buy event from FactoryCard', async () => {
     const mockBuyFactory = vi.fn()
     useGameStore.mockReturnValue({
-      qsos: 1000,
+      qsos: 1000n,
       licenseLevel: 1,
       factoryCounts: {},
       getFactoryCost: () => 10,
@@ -128,7 +128,7 @@ describe('FactoryList.vue', () => {
 
   it('shows "No factories" message when license tier blocks all', () => {
     useGameStore.mockReturnValue({
-      qsos: 0,
+      qsos: 0n,
       licenseLevel: 0,
       factoryCounts: {},
       getFactoryCost: () => 10,

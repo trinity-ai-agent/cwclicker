@@ -31,7 +31,7 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('mouseup')
     
     // Fast click = dit = 1 QSO
-    expect(store.qsos).toBe(1)
+    expect(store.qsos).toBe(1n)
   })
 
   it('triggers dah on slow mousedown/mouseup (>200ms)', async () => {
@@ -44,7 +44,7 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('mouseup')
     
     // Slow click = dah = 2 QSOs
-    expect(store.qsos).toBe(2)
+    expect(store.qsos).toBe(2n)
   })
 
   it('handles mouseleave event', async () => {
@@ -55,7 +55,7 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('mouseleave')
     
     // Fast release = dit = 1 QSO
-    expect(store.qsos).toBe(1)
+    expect(store.qsos).toBe(1n)
   })
 
   it('handles touchstart/touchend events', async () => {
@@ -66,7 +66,7 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('touchend')
     
     // Fast touch = dit = 1 QSO
-    expect(store.qsos).toBe(1)
+    expect(store.qsos).toBe(1n)
   })
 
   it('has proper accessibility attributes', () => {
@@ -84,7 +84,7 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('keydown', { key: ' ' })
     await wrapper.trigger('keyup', { key: ' ' })
     
-    expect(store.qsos).toBe(1)
+    expect(store.qsos).toBe(1n)
   })
 
   it('handles keyboard events (enter key)', async () => {
@@ -94,7 +94,7 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('keydown', { key: 'Enter' })
     await wrapper.trigger('keyup', { key: 'Enter' })
     
-    expect(store.qsos).toBe(1)
+    expect(store.qsos).toBe(1n)
   })
 
   it('ignores other keyboard events', async () => {
@@ -104,6 +104,6 @@ describe('KeyerArea.vue', () => {
     await wrapper.trigger('keydown', { key: 'a' })
     await wrapper.trigger('keyup', { key: 'a' })
     
-    expect(store.qsos).toBe(0)
+    expect(store.qsos).toBe(0n)
   })
 })

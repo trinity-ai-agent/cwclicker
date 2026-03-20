@@ -52,30 +52,30 @@ describe('Game Store - Factory Logic', () => {
   describe('buyFactory', () => {
     it('increases factory ownership and deducts QSOs', () => {
       const store = useGameStore()
-      store.qsos = 100
+      store.qsos = 100n
       
       const result = store.buyFactory('elmer', 1)
       
       expect(result).toBe(true)
       expect(store.factoryCounts['elmer']).toBe(1)
-      // Single purchase uses getBulkCost which applies 5% discount: 10 * 0.95 = 9.5
-      expect(store.qsos).toBeCloseTo(90.5, 1)
+      // Single purchase uses getBulkCost which applies 5% discount: 10 * 0.95 = 9.5, floored to 9
+      expect(store.qsos).toBe(91n)
     })
 
     it('returns false when not enough QSOs', () => {
       const store = useGameStore()
-      store.qsos = 5
+      store.qsos = 5n
       
       const result = store.buyFactory('elmer', 1)
       
       expect(result).toBe(false)
       expect(store.factoryCounts['elmer']).toBeUndefined()
-      expect(store.qsos).toBe(5)
+      expect(store.qsos).toBe(5n)
     })
 
     it('buys multiple factories at once', () => {
       const store = useGameStore()
-      store.qsos = 100
+      store.qsos = 100n
       
       const result = store.buyFactory('elmer', 2)
       
@@ -92,7 +92,7 @@ describe('Game Store - Factory Logic', () => {
 
     it('sums production from all owned factories', () => {
       const store = useGameStore()
-      store.qsos = 10000
+      store.qsos = 10000n
       store.buyFactory('elmer', 2) // 0.1 * 2 = 0.2
       store.buyFactory('straight-key', 1) // 0.3 * 1 = 0.3
       

@@ -11,6 +11,7 @@ import UpgradePanel from './components/UpgradePanel.vue'
 import FactoryCard from './components/FactoryCard.vue'
 import MultiBuyPanel from './components/MultiBuyPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
+import ErrorBoundary from './components/ErrorBoundary.vue'
 import { FACTORIES } from './constants/factories'
 import GameLoop from './components/GameLoop.vue'
 
@@ -82,7 +83,8 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
 </script>
 
 <template>
-  <div class="min-h-screen p-8 max-w-4xl mx-auto">
+  <ErrorBoundary>
+    <div class="min-h-screen p-8 max-w-4xl mx-auto">
     <StatHeader />
     <LicensePanel @upgrade="handleLicenseUpgrade" />
     <main class="space-y-6">
@@ -192,4 +194,5 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
     
     <GameLoop />
   </div>
+  </ErrorBoundary>
 </template>

@@ -7,7 +7,7 @@ import LicensePanel from './components/LicensePanel.vue'
 import KeyerArea from './components/KeyerArea.vue'
 import ClickIndicator from './components/ClickIndicator.vue'
 import AudioPanel from './components/AudioPanel.vue'
-import LotteryBonus from './components/LotteryBonus.vue'
+import RareDxBonus from './components/RareDxBonus.vue'
 import FactoryList from './components/FactoryList.vue'
 import GameLoop from './components/GameLoop.vue'
 
@@ -53,10 +53,10 @@ const handleAudioSettingsChange = (settings) => {
   store.updateAudioSettings(settings)
 }
 
-const handleBonusActivated = (factory) => {
+const handleRareDxActivated = (factory) => {
   // Bonus is already activated in the store
   // This is just for any additional UI feedback if needed
-  console.log(`Lottery bonus activated for ${factory.name}!`)
+  console.log(`Rare DX propagation boost activated for ${factory.name}!`)
 }
 </script>
 
@@ -77,7 +77,7 @@ const handleBonusActivated = (factory) => {
         @settings-change="handleAudioSettingsChange" 
       />
       
-      <LotteryBonus @bonus-activated="handleBonusActivated" />
+      <RareDxBonus @rare-dx-activated="handleRareDxActivated" />
       
       <FactoryList @buy="handleFactoryBuy" />
     </main>

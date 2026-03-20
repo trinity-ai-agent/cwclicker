@@ -21,14 +21,14 @@ export const useGameStore = defineStore('game', () => {
     isMuted: false
   })
 
-  // Lottery system
-  const LOTTERY_COOLDOWN_MS = 90000 // 90 seconds
-  const LOTTERY_CHANCE = 0.05 // 5%
-  const LOTTERY_BOOST_MULTIPLIER = 7 // 7x
-  const LOTTERY_BOOST_DURATION_MS = 77000 // 77 seconds
-  const LOTTERY_BUTTON_DURATION_MS = 10000 // 10 seconds to click
+  // Rare Dx system
+  const RARE_DX_COOLDOWN_MS = 90000 // 90 seconds
+  const RARE_DX_CHANCE = 0.05 // 5%
+  const RARE_DX_BOOST_MULTIPLIER = 7 // 7x
+  const RARE_DX_BOOST_DURATION_MS = 77000 // 77 seconds
+  const RARE_DX_BUTTON_DURATION_MS = 10000 // 10 seconds to click
 
-  const lotteryState = ref({
+  const rareDxState = ref({
     lastTriggerTime: 0,
     isBonusAvailable: false,
     bonusFactoryId: null,
@@ -49,22 +49,22 @@ export const useGameStore = defineStore('game', () => {
       console.warn(`Invalid keyer tap type: ${type}`)
     }
 
-    // Check for lottery trigger
-    checkLotteryTrigger()
+    // Check for Rare DX trigger
+    checkRareDxTrigger()
   }
 
   /**
-   * Checks if lottery should trigger on this click.
+   * Checks if Rare DX should trigger on this click.
    */
-  function checkLotteryTrigger() {
+  function checkRareDxTrigger() {
     const now = Date.now()
 
     // Check if cooldown has passed and no bonus is currently available
-    if (lotteryState.value.isBonusAvailable) {
+    if (rareDxState.value.isBonusAvailable) {
       return
     }
 
-    if (now - lotteryState.value.lastTriggerTime < LOTTERY_COOLDOWN_MS) {
+    if (now - rareDxState.value.lastTriggerTime < RARE_DX_COOLDOWN_MS) {
       return
     }
 
@@ -74,16 +74,16 @@ export const useGameStore = defineStore('game', () => {
       return
     }
 
-    // Roll for lottery
-    if (Math.random() < LOTTERY_CHANCE) {
-      triggerLottery()
+    // Roll for rareDx
+    if (Math.random() < RARE_DX_CHANCE) {
+      triggerRareDx()
     }
   }
 
   /**
-   * Triggers the lottery bonus.
+   * Triggers the rareDx bonus.
    */
-  function triggerLottery() {
+  function triggerRareDx() {
     const now = Date.now()
     const ownedFactoryIds = Object.entries(factoryCounts.value)
       .filter(([_, count]) => count > 0)
@@ -96,55 +96,55 @@ export const useGameStore = defineStore('game', () => {
     // Pick random factory
     const randomFactoryId = ownedFactoryIds[Math.floor(Math.random() * ownedFactoryIds.length)]
 
-    lotteryState.value = {
+    rareDxState.value = {
       lastTriggerTime: now,
       isBonusAvailable: true,
       bonusFactoryId: randomFactoryId,
       bonusEndTime: 0,
-      bonusAvailableEndTime: now + LOTTERY_BUTTON_DURATION_MS
+      bonusAvailableEndTime: now + RARE_DX_BUTTON_DURATION_MS
     }
   }
 
   /**
-   * Activates the lottery bonus (called when user clicks the bonus button).
+   * Activates the rareDx bonus (called when user clicks the bonus button).
    * @returns {boolean} True if activation succeeded.
    */
-  function activateLotteryBonus() {
-    if (!lotteryState.value.isBonusAvailable) {
+  function activateRareDxBonus() {
+    if (!rareDxState.value.isBonusAvailable) {
       return false
     }
 
     const now = Date.now()
 
     // Check if button is still available
-    if (now > lotteryState.value.bonusAvailableEndTime) {
-      lotteryState.value.isBonusAvailable = false
+    if (now > rareDxState.value.bonusAvailableEndTime) {
+      rareDxState.value.isBonusAvailable = false
       return false
     }
 
     // Activate the bonus
-    lotteryState.value.isBonusAvailable = false
-    lotteryState.value.bonusEndTime = now + LOTTERY_BOOST_DURATION_MS
+    rareDxState.value.isBonusAvailable = false
+    rareDxState.value.bonusEndTime = now + RARE_DX_BOOST_DURATION_MS
 
     return true
   }
 
   /**
-   * Gets the current lottery bonus multiplier for a factory.
+   * Gets the current rareDx bonus multiplier for a factory.
    * @param {string} factoryId - The factory ID.
    * @returns {number} The multiplier (1 if no bonus, 7 if bonus active).
    */
-  function getLotteryMultiplier(factoryId) {
+  function getRareDxMultiplier(factoryId) {
     const now = Date.now()
 
     // Check if bonus has expired
-    if (now > lotteryState.value.bonusEndTime) {
+    if (now > rareDxState.value.bonusEndTime) {
       return 1
     }
 
     // Check if this is the boosted factory
-    if (lotteryState.value.bonusFactoryId === factoryId) {
-      return LOTTERY_BOOST_MULTIPLIER
+    if (rareDxState.value.bonusFactoryId === factoryId) {
+      return RARE_DX_BOOST_MULTIPLIER
     }
 
     return 1
@@ -257,7 +257,7 @@ export const useGameStore = defineStore('game', () => {
         factoryCounts: factoryCounts.value,
         fractionalQSOs: fractionalQSOs.value,
         audioSettings: audioSettings.value,
-        lotteryState: lotteryState.value
+        rareDxState: rareDxState.value
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -286,15 +286,15 @@ export const useGameStore = defineStore('game', () => {
           }
         }
 
-        // Restore lottery state (check if bonus has expired)
-        if (state.lotteryState) {
+        // Restore rareDx state (check if bonus has expired)
+        if (state.rareDxState) {
           const now = Date.now()
-          lotteryState.value = {
-            lastTriggerTime: state.lotteryState.lastTriggerTime || 0,
-            isBonusAvailable: state.lotteryState.isBonusAvailable && now < state.lotteryState.bonusAvailableEndTime,
-            bonusFactoryId: state.lotteryState.bonusFactoryId || null,
-            bonusEndTime: state.lotteryState.bonusEndTime || 0,
-            bonusAvailableEndTime: state.lotteryState.bonusAvailableEndTime || 0
+          rareDxState.value = {
+            lastTriggerTime: state.rareDxState.lastTriggerTime || 0,
+            isBonusAvailable: state.rareDxState.isBonusAvailable && now < state.rareDxState.bonusAvailableEndTime,
+            bonusFactoryId: state.rareDxState.bonusFactoryId || null,
+            bonusEndTime: state.rareDxState.bonusEndTime || 0,
+            bonusAvailableEndTime: state.rareDxState.bonusAvailableEndTime || 0
           }
         }
       }
@@ -305,7 +305,7 @@ export const useGameStore = defineStore('game', () => {
 
   /**
    * Calculates the total QSOs per second from all owned factories.
-   * Applies lottery bonus multipliers.
+   * Applies rareDx bonus multipliers.
    * @returns {number} The total QSOs per second.
    */
   function getTotalQSOsPerSecond() {
@@ -314,7 +314,7 @@ export const useGameStore = defineStore('game', () => {
     for (const [factoryId, count] of Object.entries(factoryCounts.value)) {
       const factory = FACTORIES.find(f => f.id === factoryId)
       if (factory) {
-        const multiplier = getLotteryMultiplier(factoryId)
+        const multiplier = getRareDxMultiplier(factoryId)
         total += factory.qsosPerSecond * count * multiplier
       }
     }
@@ -337,7 +337,7 @@ export const useGameStore = defineStore('game', () => {
     factoryCounts,
     fractionalQSOs,
     audioSettings,
-    lotteryState,
+    rareDxState,
     tapKeyer,
     addPassiveQSOs,
     getFactoryCost,
@@ -345,8 +345,8 @@ export const useGameStore = defineStore('game', () => {
     buyFactory,
     getTotalQSOsPerSecond,
     updateAudioSettings,
-    activateLotteryBonus,
-    getLotteryMultiplier,
+    activateRareDxBonus,
+    getRareDxMultiplier,
     save,
     load
   }

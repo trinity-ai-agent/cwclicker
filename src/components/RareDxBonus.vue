@@ -6,7 +6,7 @@ import { FACTORIES } from '../constants/factories';
 /**
  * Emits events from the component.
  */
-const emit = defineEmits(['bonus-activated']);
+const emit = defineEmits(['rare-dx-activated']);
 
 const store = useGameStore();
 
@@ -31,24 +31,31 @@ onUnmounted(() => {
  * Whether a bonus button is currently available
  */
 const isBonusAvailable = computed(() => {
-  return store.lotteryState.isBonusAvailable;
+  return store.rareDxState.isBonusAvailable;
 });
 
 /**
  * The factory that will be boosted
  */
 const boostedFactory = computed(() => {
-  if (!store.lotteryState.bonusFactoryId) {
+  if (!store.rareDxState.bonusFactoryId) {
     return null;
   }
-  return FACTORIES.find(f => f.id === store.lotteryState.bonusFactoryId);
+  return FACTORIES.find(f => f.id === store.rareDxState.bonusFactoryId);
 });
 
 /**
  * Whether a bonus is currently active
+ * Also clears the boosted factory when bonus expires
  */
 const isBonusActive = computed(() => {
-  return now.value < store.lotteryState.bonusEndTime;
+  const active = now.value < store.rareDxState.bonusEndTime;
+  // If bonus just expired, clear the factory ID to reset the display
+  if (!active && store.rareDxState.bonusFactoryId && store.rareDxState.bonusEndTime > 0) {
+    store.rareDxState.bonusFactoryId = null;
+    store.rareDxState.bonusEndTime = 0;
+  }
+  return active;
 });
 
 /**
@@ -58,7 +65,7 @@ const bonusTimeRemaining = computed(() => {
   if (!isBonusActive.value) {
     return 0;
   }
-  const remaining = Math.ceil((store.lotteryState.bonusEndTime - now.value) / 1000);
+  const remaining = Math.ceil((store.rareDxState.bonusEndTime - now.value) / 1000);
   return Math.max(0, remaining);
 });
 
@@ -79,9 +86,9 @@ const formattedTimeRemaining = computed(() => {
  * Handles clicking the bonus button
  */
 function handleBonusClick() {
-  const success = store.activateLotteryBonus();
+  const success = store.activateRareDxBonus();
   if (success) {
-    emit('bonus-activated', boostedFactory.value);
+    emit('rare-dx-activated', boostedFactory.value);
   }
 }
 </script>
@@ -96,10 +103,10 @@ function handleBonusClick() {
       <div class="flex items-center justify-between">
         <div class="flex-1">
           <p class="text-terminal-amber font-bold mb-1">
-            LOTTERY BONUS AVAILABLE!
+            RARE DX SPOTTED!
           </p>
           <p class="text-sm text-gray-400">
-            Click to boost {{ boostedFactory.name }} output by 7x for 77 seconds!
+            Propagation opening on {{ boostedFactory.name }}! 7x boost for 77 seconds!
           </p>
         </div>
 
@@ -107,7 +114,7 @@ function handleBonusClick() {
           @click="handleBonusClick"
           class="ml-4 px-6 py-3 bg-terminal-amber text-terminal-bg font-bold rounded hover:bg-yellow-500 transition-colors animate-bounce"
         >
-          ACTIVATE!
+          WORK IT!
         </button>
       </div>
     </div>

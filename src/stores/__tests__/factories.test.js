@@ -22,6 +22,49 @@ describe('Game Store - Factory Logic', () => {
     })
   })
 
+  describe('addPassiveQSOs', () => {
+    it('adds QSOs to the store', () => {
+      const store = useGameStore()
+      
+      store.addPassiveQSOs(5)
+      
+      expect(store.qsos).toBe(5n)
+    })
+
+    it('accumulates QSOs over multiple calls', () => {
+      const store = useGameStore()
+      
+      store.addPassiveQSOs(3)
+      store.addPassiveQSOs(7)
+      
+      expect(store.qsos).toBe(10n)
+    })
+
+    it('floors decimal amounts', () => {
+      const store = useGameStore()
+      
+      store.addPassiveQSOs(5.7)
+      
+      expect(store.qsos).toBe(5n)
+    })
+
+    it('handles zero correctly', () => {
+      const store = useGameStore()
+      
+      store.addPassiveQSOs(0)
+      
+      expect(store.qsos).toBe(0n)
+    })
+
+    it('handles very large numbers', () => {
+      const store = useGameStore()
+      
+      store.addPassiveQSOs(1e15)
+      
+      expect(store.qsos).toBe(1000000000000000n)
+    })
+  })
+
   describe('getFactoryCost', () => {
     it('calculates cost for tier 1-2 with 10% scaling (elmer)', () => {
       const store = useGameStore()

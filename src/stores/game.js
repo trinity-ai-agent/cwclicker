@@ -28,6 +28,14 @@ const qsos = ref(0n)
   }
 
   /**
+   * Adds passive QSOs from factories to the total.
+   * @param {number} amount - The amount of QSOs to add (will be floored).
+   */
+  function addPassiveQSOs(amount) {
+    qsos.value = qsos.value + BigInt(Math.floor(amount))
+  }
+
+  /**
    * Gets the tier multiplier for cost calculation.
    * @param {number} tier - The factory tier (1-7).
    * @returns {number} The multiplier for cost calculation.
@@ -163,6 +171,7 @@ const qsos = ref(0n)
     licenseLevel,
     factoryCounts,
     tapKeyer,
+    addPassiveQSOs,
     getFactoryCost,
     getBulkCost,
     buyFactory,

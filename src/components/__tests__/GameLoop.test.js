@@ -50,6 +50,7 @@ describe('GameLoop.vue', () => {
     mockStore = {
       qsos: 0n,
       getTotalQSOsPerSecond: vi.fn().mockReturnValue(0),
+      addPassiveQSOs: vi.fn(),
       save: vi.fn()
     }
     useGameStore.mockReturnValue(mockStore)
@@ -68,7 +69,7 @@ describe('GameLoop.vue', () => {
     expect(requestAnimationFrameSpy).toHaveBeenCalled()
   })
 
-  it('adds QSOs from factories based on delta time', () => {
+  it('calls addPassiveQSOs with correct amount based on delta time', () => {
     mockStore.getTotalQSOsPerSecond.mockReturnValue(10) // 10 QSOs per second
     
     mount(GameLoop)
@@ -76,8 +77,8 @@ describe('GameLoop.vue', () => {
     // Simulate 100ms passing (0.1 seconds)
     window.__triggerRAF(100)
     
-    // Should add 10 QSOs/sec * 0.1 sec = 1 QSO
-    expect(mockStore.qsos).toBe(1n)
+    // Should call addPassiveQSOs with 10 QSOs/sec * 0.1 sec = 1 QSO
+    expect(mockStore.addPassiveQSOs).toHaveBeenCalledWith(1)
   })
 
   it('accumulates QSOs over multiple frames', () => {
@@ -87,12 +88,14 @@ describe('GameLoop.vue', () => {
     
     // First frame: 50ms
     window.__triggerRAF(50)
+    expect(mockStore.addPassiveQSOs).toHaveBeenCalledWith(0.5)
+    
     // Second frame: 150ms (100ms delta)
     window.__triggerRAF(150)
+    expect(mockStore.addPassiveQSOs).toHaveBeenLastCalledWith(1)
     
-    // 10 QSOs/sec * 0.15 sec = 1.5 QSOs -> 1 QSO (floored)
-    // Plus any accumulated from first frame
-    expect(mockStore.qsos).toBeGreaterThan(0)
+    // Should have been called twice
+    expect(mockStore.addPassiveQSOs).toHaveBeenCalledTimes(2)
   })
 
   it('auto-saves every 30 seconds', () => {
@@ -133,17 +136,17 @@ describe('GameLoop.vue', () => {
     window.__triggerRAF(16.67)
     
     // 60 QSOs/sec * 0.01667 sec = 1 QSO
-    expect(mockStore.qsos).toBe(1n)
+    expect(mockStore.addPassiveQSOs).toHaveBeenCalledWith(expect.closeTo(1, 0))
   })
 
-  it('does not add QSOs when factory production is zero', () => {
+  it('does not call addPassiveQSOs when factory production is zero', () => {
     mockStore.getTotalQSOsPerSecond.mockReturnValue(0)
     
     mount(GameLoop)
     
     window.__triggerRAF(1000)
     
-    expect(mockStore.qsos).toBe(0n)
+    expect(mockStore.addPassiveQSOs).not.toHaveBeenCalled()
   })
 
   it('handles variable frame rates correctly', () => {
@@ -153,13 +156,14 @@ describe('GameLoop.vue', () => {
     
     // Slow frame (33.33ms - 30fps)
     window.__triggerRAF(33.33)
-    // 100 * 0.03333 = 3.333 -> 3 QSOs
-    expect(mockStore.qsos).toBe(3n)
+    // 100 * 0.03333 = 3.333 QSOs
+    expect(mockStore.addPassiveQSOs).toHaveBeenLastCalledWith(expect.closeTo(3.333, 1))
     
     // Fast frame (16.67ms later - 60fps)
     window.__triggerRAF(50)
-    // Delta: 16.67ms, 100 * 0.01667 = 1.667 -> 1 QSO
-    // Total: 3 + 1 = 4
-    expect(mockStore.qsos).toBe(4n)
+    // Delta: 16.67ms, 100 * 0.01667 = 1.667 QSOs
+    expect(mockStore.addPassiveQSOs).toHaveBeenLastCalledWith(expect.closeTo(1.667, 1))
+    
+    expect(mockStore.addPassiveQSOs).toHaveBeenCalledTimes(2)
   })
 })

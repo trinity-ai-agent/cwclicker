@@ -80,6 +80,41 @@ const totalFactoryCount = computed(() => {
 })
 
 const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
+
+/**
+ * Handle keyboard navigation for tabs
+ * @param {KeyboardEvent} event - The keyboard event
+ * @param {string} tabId - The current tab ID
+ */
+function handleTabKeydown(event, tabId) {
+  const tabIds = tabs.map(t => t.id)
+  const currentIndex = tabIds.indexOf(tabId)
+
+  switch (event.key) {
+    case 'ArrowLeft':
+      event.preventDefault()
+      const prevIndex = currentIndex > 0 ? currentIndex - 1 : tabIds.length - 1
+      activeTab.value = tabIds[prevIndex]
+      document.getElementById(`tab-${tabIds[prevIndex]}`)?.focus()
+      break
+    case 'ArrowRight':
+      event.preventDefault()
+      const nextIndex = currentIndex < tabIds.length - 1 ? currentIndex + 1 : 0
+      activeTab.value = tabIds[nextIndex]
+      document.getElementById(`tab-${tabIds[nextIndex]}`)?.focus()
+      break
+    case 'Home':
+      event.preventDefault()
+      activeTab.value = tabIds[0]
+      document.getElementById(`tab-${tabIds[0]}`)?.focus()
+      break
+    case 'End':
+      event.preventDefault()
+      activeTab.value = tabIds[tabIds.length - 1]
+      document.getElementById(`tab-${tabIds[tabIds.length - 1]}`)?.focus()
+      break
+  }
+}
 </script>
 
 <template>
@@ -102,11 +137,17 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
       
       <!-- Tab Navigation -->
       <div class="border-b border-terminal-green">
-        <nav class="flex space-x-1" aria-label="Tabs">
+        <nav class="flex space-x-1" role="tablist" aria-label="Game sections">
           <button
             v-for="tab in tabs"
             :key="tab.id"
+            :id="`tab-${tab.id}`"
+            role="tab"
+            :aria-selected="activeTab === tab.id"
+            :aria-controls="`panel-${tab.id}`"
+            :tabindex="activeTab === tab.id ? 0 : -1"
             @click="activeTab = tab.id"
+            @keydown="handleTabKeydown($event, tab.id)"
             :class="[
               activeTab === tab.id
                 ? 'border-terminal-green text-terminal-green'
@@ -123,7 +164,13 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
       <div class="space-y-4">
         <KeepAlive>
           <!-- Store Tab -->
-          <div v-if="activeTab === 'store'" class="space-y-4">
+          <div
+            v-if="activeTab === 'store'"
+            id="panel-store"
+            role="tabpanel"
+            aria-labelledby="tab-store"
+            class="space-y-4"
+          >
           <div class="flex justify-between items-center px-2">
             <div>
               <h2 class="text-xl font-bold text-terminal-green">Factory Store</h2>
@@ -145,7 +192,13 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
         </div>
         
         <!-- Bulk Buy Tab -->
-        <div v-if="activeTab === 'bulk'" class="space-y-4">
+        <div
+          v-if="activeTab === 'bulk'"
+          id="panel-bulk"
+          role="tabpanel"
+          aria-labelledby="tab-bulk"
+          class="space-y-4"
+        >
           <div class="flex justify-between items-center px-2">
             <h2 class="text-xl font-bold text-terminal-green">Bulk Purchase</h2>
             <span class="text-terminal-green">Unlocks at 10 total factories</span>
@@ -168,12 +221,22 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
         </div>
         
         <!-- Upgrades Tab -->
-        <div v-if="activeTab === 'upgrades'">
+        <div
+          v-if="activeTab === 'upgrades'"
+          id="panel-upgrades"
+          role="tabpanel"
+          aria-labelledby="tab-upgrades"
+        >
           <UpgradePanel />
         </div>
-        
+
         <!-- Settings Tab -->
-        <div v-if="activeTab === 'settings'">
+        <div
+          v-if="activeTab === 'settings'"
+          id="panel-settings"
+          role="tabpanel"
+          aria-labelledby="tab-settings"
+        >
           <SettingsPanel />
         </div>
         </KeepAlive>

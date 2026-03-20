@@ -22,6 +22,11 @@ const handleDown = () => {
 /**
  * Handles the keyer up event (mouseup/touchend/mouseleave).
  */
+/**
+ * Emits events from the component.
+ */
+const emit = defineEmits(['tap'])
+
 const handleUp = () => {
   if (!isDown.value) return
   isDown.value = false
@@ -29,7 +34,10 @@ const handleUp = () => {
   
   const duration = Date.now() - startTime.value
   const type = duration < DIT_DAH_THRESHOLD_MS ? 'dit' : 'dah'
+  const qsoValue = type === 'dit' ? 1 : 2
+  
   store.tapKeyer(type)
+  emit('tap', qsoValue)
 }
 
 /**

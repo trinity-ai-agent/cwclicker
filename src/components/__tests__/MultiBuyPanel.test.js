@@ -143,12 +143,12 @@ describe('MultiBuyPanel.vue', () => {
   })
 
   it('MAX button calculates correctly and emits buy event', async () => {
-    // With 1000 QSOs and cost of 10 each, can afford 100
+    // With 1000 QSOs and cost of 10 each with 5% discount, can afford 105
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
       getFactoryCost: () => 10n,
-      getBulkCost: () => 950n
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95))
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -162,7 +162,7 @@ describe('MultiBuyPanel.vue', () => {
     await buttons[3].trigger('click')
 
     expect(wrapper.emitted('buy')).toBeTruthy()
-    expect(wrapper.emitted('buy')[0]).toEqual([{ factory: elmerFactory, count: 100 }])
+    expect(wrapper.emitted('buy')[0]).toEqual([{ factory: elmerFactory, count: 105 }])
   })
 
   it('disables buttons when cannot afford', () => {
@@ -190,8 +190,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 500n,
       factoryCounts: {},
-      getFactoryCost: (id, owned) => 10n, // Fixed cost for simplicity
-      getBulkCost: () => 950n
+      getFactoryCost: () => 10n,
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95))
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -202,8 +202,8 @@ describe('MultiBuyPanel.vue', () => {
     })
 
     const buttons = wrapper.findAll('button')
-    // With 500 QSOs and cost of 10 each, can afford 50
-    expect(buttons[3].text()).toContain('50')
+    // With 500 QSOs and cost of 10 each with 5% discount, can afford 52
+    expect(buttons[3].text()).toContain('52')
   })
 
   it('MAX button stops at reasonable limit when cost is invalid', () => {

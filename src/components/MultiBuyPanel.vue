@@ -35,21 +35,29 @@ const cost100 = computed(() => {
 
 const maxCount = computed(() => {
   if (!props.factory) return 0
-  let count = 0
-  let totalCost = 0n
-  const currentOwned = store.factoryCounts[props.factory.id] || 0
-  const MAX_ITERATIONS = 100000 // Safety limit
   
-  while (count < MAX_ITERATIONS) {
-    const nextCost = store.getFactoryCost(props.factory.id, currentOwned + count)
-    // Safety check: cost must be positive
-    if (nextCost <= 0n) break
-    if (store.qsos < totalCost + nextCost) break
-    totalCost += nextCost
-    count++
+  const availableQsos = store.qsos
+  const currentOwned = store.factoryCounts[props.factory.id] || 0
+  
+  // Binary search for maximum affordable count
+  // This is O(log n) instead of O(n) for the iterative approach
+  let low = 0
+  let high = 100000 // Reasonable upper bound
+  let best = 0
+  
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2)
+    const cost = store.getBulkCost(props.factory.id, mid)
+    
+    if (cost <= availableQsos) {
+      best = mid
+      low = mid + 1
+    } else {
+      high = mid - 1
+    }
   }
   
-  return count
+  return best
 })
 
 const canAfford1 = computed(() => store.qsos >= cost1.value)

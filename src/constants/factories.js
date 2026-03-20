@@ -16,6 +16,14 @@
  */
 const TECHNICIAN_FACTORIES = [
   {
+    id: 'qrq-protocol',
+    name: 'QRQ Protocol',
+    baseCost: 15,
+    qsosPerSecond: 0.1,
+    tier: 1,
+    description: "QRQ? QRQ? Yes, please! Each unit autoclicks the keyer every 10 seconds."
+  },
+  {
     id: 'elmer',
     name: 'Elmer',
     baseCost: 10,
@@ -30,14 +38,6 @@ const TECHNICIAN_FACTORIES = [
     qsosPerSecond: 0.3,
     tier: 1,
     description: "Purists who insist 'real hams use straight keys.' Click... click... click..."
-  },
-  {
-    id: 'novice-license-holder',
-    name: 'Novice License Holder',
-    baseCost: 100,
-    qsosPerSecond: 0.5,
-    tier: 1,
-    description: "Still learning. Has been meaning to get on HF for the past 30 years."
   },
   {
     id: 'paddle-key',

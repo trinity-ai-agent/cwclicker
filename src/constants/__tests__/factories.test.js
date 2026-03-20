@@ -59,6 +59,15 @@ describe('FACTORIES', () => {
       expect(techFactories).toHaveLength(6);
     });
 
+    it('has correct data for QRQ Protocol', () => {
+      const qrq = FACTORIES.find(f => f.id === 'qrq-protocol');
+      expect(qrq).toBeDefined();
+      expect(qrq.name).toBe('QRQ Protocol');
+      expect(qrq.baseCost).toBe(15);
+      expect(qrq.qsosPerSecond).toBe(0.1);
+      expect(qrq.tier).toBe(1);
+    });
+
     it('has correct data for Elmer', () => {
       const elmer = FACTORIES.find(f => f.id === 'elmer');
       expect(elmer).toBeDefined();
@@ -77,13 +86,13 @@ describe('FACTORIES', () => {
       expect(straightKey.tier).toBe(1);
     });
 
-    it('has correct data for Novice License Holder', () => {
-      const novice = FACTORIES.find(f => f.id === 'novice-license-holder');
-      expect(novice).toBeDefined();
-      expect(novice.name).toBe('Novice License Holder');
-      expect(novice.baseCost).toBe(100);
-      expect(novice.qsosPerSecond).toBe(0.5);
-      expect(novice.tier).toBe(1);
+    it('has correct data for Straight Key', () => {
+      const straightKey = FACTORIES.find(f => f.id === 'straight-key');
+      expect(straightKey).toBeDefined();
+      expect(straightKey.name).toBe('Straight Key');
+      expect(straightKey.baseCost).toBe(50);
+      expect(straightKey.qsosPerSecond).toBe(0.3);
+      expect(straightKey.tier).toBe(1);
     });
 
     it('has correct data for Paddle Key', () => {
@@ -266,6 +275,11 @@ describe('FACTORIES', () => {
   });
 
   describe('descriptions', () => {
+    it('QRQ Protocol has a satirical description', () => {
+      const qrq = FACTORIES.find(f => f.id === 'qrq-protocol');
+      expect(qrq.description).toContain("QRQ");
+    });
+
     it('Elmer has a satirical description', () => {
       const elmer = FACTORIES.find(f => f.id === 'elmer');
       expect(elmer.description).toContain("Just listen for a bit");

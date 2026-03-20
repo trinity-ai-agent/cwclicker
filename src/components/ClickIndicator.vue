@@ -131,13 +131,27 @@ defineExpose({
 </script>
 
 <template>
-  <div class="flex flex-col items-end justify-center h-full gap-1 min-w-[60px]">
+  <div
+    class="flex flex-col items-end justify-center h-full gap-1 min-w-[60px]"
+    aria-live="polite"
+    aria-atomic="false"
+    aria-relevant="additions"
+  >
+    <!-- Screen reader announcements for each click -->
+    <div class="sr-only" role="status">
+      <span v-for="indicator in indicators" :key="`sr-${indicator.id}`">
+        Added {{ indicator.value }} QSOs
+      </span>
+    </div>
+
+    <!-- Visual indicators -->
     <TransitionGroup name="indicator">
       <div
         v-for="indicator in indicators"
         :key="indicator.id"
         class="text-terminal-green font-bold text-lg transition-all duration-100"
         :style="{ opacity: indicator.opacity }"
+        aria-hidden="true"
       >
         {{ formatValue(indicator.value) }}
       </div>

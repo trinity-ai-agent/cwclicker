@@ -119,10 +119,11 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
         </nav>
       </div>
       
-      <!-- Tab Content -->
+      <!-- Tab Content with KeepAlive -->
       <div class="space-y-4">
-        <!-- Store Tab -->
-        <div v-if="activeTab === 'store'" class="space-y-4">
+        <KeepAlive>
+          <!-- Store Tab -->
+          <div v-if="activeTab === 'store'" class="space-y-4">
           <div class="flex justify-between items-center px-2">
             <div>
               <h2 class="text-xl font-bold text-terminal-green">Factory Store</h2>
@@ -175,6 +176,7 @@ const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
         <div v-if="activeTab === 'settings'">
           <SettingsPanel />
         </div>
+        </KeepAlive>
       </div>
     </main>
     

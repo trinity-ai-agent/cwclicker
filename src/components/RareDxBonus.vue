@@ -14,11 +14,36 @@ const store = useGameStore();
 const now = ref(Date.now());
 let timerInterval = null;
 
+/**
+ * Check if timer should be running (any active bonus or bonus available)
+ */
+const shouldTimerRun = computed(() => {
+  const hasBonusAvailable = store.lotteryState.isBonusAvailable;
+  const hasActiveBonus = now.value < store.lotteryState.bonusEndTime;
+  const hasActiveStorm = store.lotteryState.isSolarStorm && now.value < store.lotteryState.solarStormEndTime;
+  return hasBonusAvailable || hasActiveBonus || hasActiveStorm;
+});
+
+/**
+ * Start or stop timer based on whether bonuses are active
+ */
+function updateTimer() {
+  const needsTimer = shouldTimerRun.value;
+
+  if (needsTimer && !timerInterval) {
+    // Start timer
+    timerInterval = setInterval(() => {
+      now.value = Date.now();
+    }, 1000);
+  } else if (!needsTimer && timerInterval) {
+    // Stop timer
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
 onMounted(() => {
-  // Update timestamp every second to refresh the countdown
-  timerInterval = setInterval(() => {
-    now.value = Date.now();
-  }, 1000);
+  updateTimer();
 });
 
 onUnmounted(() => {
@@ -26,6 +51,11 @@ onUnmounted(() => {
     clearInterval(timerInterval);
   }
 });
+
+// Watch for changes that might require starting/stopping the timer
+watch(shouldTimerRun, () => {
+  updateTimer();
+}, { immediate: true });
 
 /**
  * Watch for bonus expiration and clean up state

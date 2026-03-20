@@ -18,6 +18,8 @@ const totalFactoryCount = computed(() => {
 const multiBuyAvailable = computed(() => totalFactoryCount.value >= 10)
 
 const totalQSOsPerSecond = computed(() => {
+  // Access lottery state to trigger reactivity when bonus/solar storm changes
+  const lotteryState = store.lotteryState
   return store.getTotalQSOsPerSecond()
 })
 

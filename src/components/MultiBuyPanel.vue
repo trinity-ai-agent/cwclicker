@@ -38,9 +38,12 @@ const maxCount = computed(() => {
   let count = 0
   let totalCost = 0n
   const currentOwned = store.factoryCounts[props.factory.id] || 0
+  const MAX_ITERATIONS = 100000 // Safety limit
   
-  while (true) {
+  while (count < MAX_ITERATIONS) {
     const nextCost = store.getFactoryCost(props.factory.id, currentOwned + count)
+    // Safety check: cost must be positive
+    if (nextCost <= 0n) break
     if (store.qsos < totalCost + nextCost) break
     totalCost += nextCost
     count++

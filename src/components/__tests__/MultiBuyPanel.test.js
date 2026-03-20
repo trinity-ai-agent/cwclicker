@@ -205,4 +205,46 @@ describe('MultiBuyPanel.vue', () => {
     // With 500 QSOs and cost of 10 each, can afford 50
     expect(buttons[3].text()).toContain('50')
   })
+
+  it('MAX button stops at reasonable limit when cost is invalid', () => {
+    // If getFactoryCost returns 0 or negative, loop should stop immediately
+    useGameStore.mockReturnValue({
+      qsos: 1000000n,
+      factoryCounts: {},
+      getFactoryCost: () => 0n, // Invalid cost
+      getBulkCost: () => 0n
+    })
+
+    const wrapper = mount(MultiBuyPanel, {
+      props: {
+        multiBuyAvailable: true,
+        factory: elmerFactory
+      }
+    })
+
+    const buttons = wrapper.findAll('button')
+    // Should show MAX: 0 since cost is invalid
+    expect(buttons[3].text()).toContain('0')
+  })
+
+  it('MAX button stops at reasonable limit when cost is negative', () => {
+    // If getFactoryCost returns negative, loop should stop immediately
+    useGameStore.mockReturnValue({
+      qsos: 1000000n,
+      factoryCounts: {},
+      getFactoryCost: () => -10n, // Invalid negative cost
+      getBulkCost: () => 0n
+    })
+
+    const wrapper = mount(MultiBuyPanel, {
+      props: {
+        multiBuyAvailable: true,
+        factory: elmerFactory
+      }
+    })
+
+    const buttons = wrapper.findAll('button')
+    // Should show MAX: 0 since cost is invalid
+    expect(buttons[3].text()).toContain('0')
+  })
 })

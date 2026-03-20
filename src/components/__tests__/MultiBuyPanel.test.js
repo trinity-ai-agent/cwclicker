@@ -22,8 +22,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: (id, count) => count * 10 * 0.95
+      getFactoryCost: () => 10n,
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95))
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -41,8 +41,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: () => 95
+      getFactoryCost: () => 10n,
+      getBulkCost: () => 95n
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -59,8 +59,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: (id, count) => count * 10 * 0.95
+      getFactoryCost: () => 10n,
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95))
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -80,8 +80,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: () => 95
+      getFactoryCost: () => 10n,
+      getBulkCost: () => 95n
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -102,8 +102,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: () => 95
+      getFactoryCost: () => 10n,
+      getBulkCost: () => 95n
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -124,8 +124,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: () => 95
+      getFactoryCost: () => 10n,
+      getBulkCost: () => 95n
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -147,8 +147,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: () => 950
+      getFactoryCost: () => 10n,
+      getBulkCost: () => 950n
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -169,8 +169,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 5n, // Can't afford any
       factoryCounts: {},
-      getFactoryCost: () => 10,
-      getBulkCost: () => 95
+      getFactoryCost: () => 10n,
+      getBulkCost: () => 95n
     })
 
     const wrapper = mount(MultiBuyPanel, {
@@ -190,8 +190,8 @@ describe('MultiBuyPanel.vue', () => {
     useGameStore.mockReturnValue({
       qsos: 500n,
       factoryCounts: {},
-      getFactoryCost: (id, owned) => 10, // Fixed cost for simplicity
-      getBulkCost: () => 950
+      getFactoryCost: (id, owned) => 10n, // Fixed cost for simplicity
+      getBulkCost: () => 950n
     })
 
     const wrapper = mount(MultiBuyPanel, {

@@ -20,9 +20,9 @@ describe('FactoryList.vue', () => {
       qsos: 1000n,
       licenseLevel: 2,
       factoryCounts: {},
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 0,
-      getBulkCost: () => 100
+      getBulkCost: () => 100n
     })
 
     const wrapper = mount(FactoryList)
@@ -41,9 +41,9 @@ describe('FactoryList.vue', () => {
       qsos: 10000n,
       licenseLevel: 1,
       factoryCounts: {},
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 0,
-      getBulkCost: () => 100
+      getBulkCost: () => 100n
     })
 
     const wrapper = mount(FactoryList)
@@ -60,9 +60,9 @@ describe('FactoryList.vue', () => {
       qsos: 1000n,
       licenseLevel: 1,
       factoryCounts: { 'elmer': 2, 'straight-key': 1 },
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 2.5,
-      getBulkCost: () => 100
+      getBulkCost: () => 100n
     })
 
     const wrapper = mount(FactoryList)
@@ -75,9 +75,9 @@ describe('FactoryList.vue', () => {
       qsos: 10000n,
       licenseLevel: 2,
       factoryCounts: { 'elmer': 5, 'straight-key': 5 },
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 4,
-      getBulkCost: () => 100
+      getBulkCost: () => 100n
     })
 
     const wrapper = mount(FactoryList)
@@ -92,9 +92,9 @@ describe('FactoryList.vue', () => {
       qsos: 1000n,
       licenseLevel: 2,
       factoryCounts: { 'elmer': 3, 'straight-key': 2 },
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 2,
-      getBulkCost: () => 100
+      getBulkCost: () => 100n
     })
 
     const wrapper = mount(FactoryList)
@@ -108,7 +108,7 @@ describe('FactoryList.vue', () => {
       qsos: 1000n,
       licenseLevel: 1,
       factoryCounts: {},
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 0,
       getBulkCost: () => 100,
       buyFactory: mockBuyFactory
@@ -131,9 +131,9 @@ describe('FactoryList.vue', () => {
       qsos: 0n,
       licenseLevel: 0,
       factoryCounts: {},
-      getFactoryCost: () => 10,
+      getFactoryCost: () => 10n,
       getTotalQSOsPerSecond: () => 0,
-      getBulkCost: () => 100
+      getBulkCost: () => 100n
     })
 
     const wrapper = mount(FactoryList)

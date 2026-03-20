@@ -18,19 +18,19 @@ const emit = defineEmits(['buy'])
 const store = useGameStore()
 
 const cost1 = computed(() => {
-  if (!props.factory) return 0
+  if (!props.factory) return 0n
   const owned = store.factoryCounts[props.factory.id] || 0
-  return BigInt(Math.floor(store.getFactoryCost(props.factory.id, owned)))
+  return store.getFactoryCost(props.factory.id, owned)
 })
 
 const cost10 = computed(() => {
   if (!props.factory) return 0n
-  return BigInt(Math.floor(store.getBulkCost(props.factory.id, 10)))
+  return store.getBulkCost(props.factory.id, 10)
 })
 
 const cost100 = computed(() => {
   if (!props.factory) return 0n
-  return BigInt(Math.floor(store.getBulkCost(props.factory.id, 100)))
+  return store.getBulkCost(props.factory.id, 100)
 })
 
 const maxCount = computed(() => {
@@ -40,7 +40,7 @@ const maxCount = computed(() => {
   const currentOwned = store.factoryCounts[props.factory.id] || 0
   
   while (true) {
-    const nextCost = BigInt(Math.floor(store.getFactoryCost(props.factory.id, currentOwned + count)))
+    const nextCost = store.getFactoryCost(props.factory.id, currentOwned + count)
     if (store.qsos < totalCost + nextCost) break
     totalCost += nextCost
     count++

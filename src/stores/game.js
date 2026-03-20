@@ -55,40 +55,41 @@ const qsos = ref(0n)
    * Calculates the cost of a factory based on owned count.
    * @param {string} factoryId - The factory ID.
    * @param {number} owned - The number of factories currently owned.
-   * @returns {number} The cost of the next factory.
+   * @returns {bigint} The cost of the next factory.
    */
   function getFactoryCost(factoryId, owned) {
     const factory = FACTORIES.find(f => f.id === factoryId)
     if (!factory) {
       console.warn(`Factory not found: ${factoryId}`)
-      return 0
+      return 0n
     }
     
     const multiplier = getTierMultiplier(factory.tier)
-    return factory.baseCost * Math.pow(multiplier, owned)
+    return BigInt(Math.floor(factory.baseCost * Math.pow(multiplier, owned)))
   }
 
   /**
    * Calculates the bulk cost for buying multiple factories.
    * @param {string} factoryId - The factory ID.
    * @param {number} count - The number of factories to buy.
-   * @returns {number} The total cost with 5% discount.
+   * @returns {bigint} The total cost with 5% discount.
    */
   function getBulkCost(factoryId, count) {
     const factory = FACTORIES.find(f => f.id === factoryId)
     if (!factory) {
       console.warn(`Factory not found: ${factoryId}`)
-      return 0
+      return 0n
     }
     
     const currentOwned = factoryCounts.value[factoryId] || 0
-    let totalCost = 0
+    let totalCost = 0n
     
     for (let i = 0; i < count; i++) {
       totalCost += getFactoryCost(factoryId, currentOwned + i)
     }
     
-    return totalCost * 0.95 // 5% discount
+    // Apply 5% discount: totalCost * 95 / 100
+    return (totalCost * 95n) / 100n
   }
 
   /**
@@ -106,11 +107,11 @@ const qsos = ref(0n)
     
     const cost = getBulkCost(factoryId, count)
     
-    if (qsos.value < BigInt(Math.floor(cost))) {
+    if (qsos.value < cost) {
       return false
     }
     
-    qsos.value -= BigInt(Math.floor(cost))
+    qsos.value -= cost
     factoryCounts.value[factoryId] = (factoryCounts.value[factoryId] || 0) + count
     
     return true

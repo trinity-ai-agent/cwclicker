@@ -31,7 +31,7 @@ const currentCost = computed(() => {
  * Determines if the user can afford this factory.
  */
 const canAfford = computed(() => {
-  return store.qsos >= BigInt(Math.floor(currentCost.value))
+  return store.qsos >= currentCost.value
 })
 
 /**
@@ -63,7 +63,7 @@ const handleBuy = () => {
     <div class="flex justify-between items-center">
       <div class="text-terminal-green">
         <span class="mr-4">{{ factory.qsosPerSecond }}/sec</span>
-        <span>Cost: {{ currentCost }}</span>
+        <span>Cost: {{ currentCost.toString() }}</span>
       </div>
       
       <div class="flex items-center gap-2">

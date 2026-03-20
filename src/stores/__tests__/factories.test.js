@@ -70,25 +70,25 @@ describe('Game Store - Factory Logic', () => {
       const store = useGameStore()
       const elmer = FACTORIES.find(f => f.id === 'elmer')
       
-      expect(store.getFactoryCost('elmer', 0)).toBe(10)
-      expect(store.getFactoryCost('elmer', 1)).toBeCloseTo(11, 1)
-      expect(store.getFactoryCost('elmer', 5)).toBeCloseTo(16.11, 1)
+      expect(store.getFactoryCost('elmer', 0)).toBe(10n)
+      expect(store.getFactoryCost('elmer', 1)).toBe(11n)
+      expect(store.getFactoryCost('elmer', 5)).toBe(16n)
     })
 
     it('calculates cost for tier 3-5 with 7% scaling (vertical-antenna)', () => {
       const store = useGameStore()
       
-      expect(store.getFactoryCost('vertical-antenna', 0)).toBe(5000)
-      expect(store.getFactoryCost('vertical-antenna', 1)).toBeCloseTo(5350, 0)
-      expect(store.getFactoryCost('vertical-antenna', 5)).toBeCloseTo(7012.76, 1)
+      expect(store.getFactoryCost('vertical-antenna', 0)).toBe(5000n)
+      expect(store.getFactoryCost('vertical-antenna', 1)).toBe(5350n)
+      expect(store.getFactoryCost('vertical-antenna', 5)).toBe(7012n)
     })
 
     it('calculates cost for tier 6-7 with 5% scaling (ft8-bot)', () => {
       const store = useGameStore()
       
-      expect(store.getFactoryCost('ft8-bot', 0)).toBe(5000000)
-      expect(store.getFactoryCost('ft8-bot', 1)).toBeCloseTo(5250000, 0)
-      expect(store.getFactoryCost('ft8-bot', 5)).toBeCloseTo(6381407.81, 1)
+      expect(store.getFactoryCost('ft8-bot', 0)).toBe(5000000n)
+      expect(store.getFactoryCost('ft8-bot', 1)).toBe(5250000n)
+      expect(store.getFactoryCost('ft8-bot', 5)).toBe(6381407n)
     })
   })
 
@@ -101,7 +101,7 @@ describe('Game Store - Factory Logic', () => {
       
       expect(result).toBe(true)
       expect(store.factoryCounts['elmer']).toBe(1)
-      // Single purchase uses getBulkCost which applies 5% discount: 10 * 0.95 = 9.5, floored to 9
+      // Single purchase uses getBulkCost which applies 5% discount: 10 * 95 / 100 = 9
       expect(store.qsos).toBe(91n)
     })
 
@@ -151,19 +151,19 @@ describe('Game Store - Factory Logic', () => {
       // Cost 0: 10
       // Cost 1: 10 * 1.10 = 11
       // Sum: 21
-      // Discounted: 21 * 0.95 = 19.95
+      // Discounted: 21 * 95 / 100 = 19 (integer division)
       const bulkCost = store.getBulkCost('elmer', 2)
-      expect(bulkCost).toBeCloseTo(19.95, 1)
+      expect(bulkCost).toBe(19n)
     })
 
     it('applies 5% discount to larger purchases', () => {
       const store = useGameStore()
       
       // Manual sum of 5 elmer factories
-      // 10 + 11 + 12.1 + 13.31 + 14.641 = 61.051
-      // With 5% discount: 57.99845
+      // 10 + 11 + 12 + 13 + 14 = 60 (floored values)
+      // With 5% discount: 60 * 95 / 100 = 57
       const bulkCost = store.getBulkCost('elmer', 5)
-      expect(bulkCost).toBeCloseTo(57.998, 2)
+      expect(bulkCost).toBe(57n)
     })
   })
 })

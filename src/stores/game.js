@@ -15,12 +15,12 @@ export const useGameStore = defineStore('game', () => {
   const factoryCounts = ref({})
   const fractionalQSOs = ref(0) // Accumulate fractional QSOs between frames
   const purchasedUpgrades = ref(new Set()) // Set of upgrade IDs that have been purchased
-  
+
   // Audio settings
   const audioSettings = ref({
     volume: 0.5,
     frequency: 600,
-    isMuted: false
+    isMuted: false,
   })
 
   // Lottery system
@@ -41,7 +41,7 @@ export const useGameStore = defineStore('game', () => {
     '6m Band Opening',
     'QSO Party!',
     'POTA POTA POTA!',
-    'FT8 Protocol'
+    'FT8 Protocol',
   ]
 
   const lotteryState = ref({
@@ -52,8 +52,11 @@ export const useGameStore = defineStore('game', () => {
     bonusAvailableEndTime: 0,
     phenomenonTitle: '',
     isSolarStorm: false,
-    solarStormEndTime: 0
+    solarStormEndTime: 0,
   })
+
+  // Offline progress tracking
+  const offlineEarnings = ref(null)
 
   /**
    * Processes a keyer tap to add QSOs.
@@ -126,7 +129,7 @@ export const useGameStore = defineStore('game', () => {
       bonusAvailableEndTime: now + LOTTERY_BUTTON_DURATION_MS,
       phenomenonTitle: randomTitle,
       isSolarStorm: false,
-      solarStormEndTime: 0
+      solarStormEndTime: 0,
     }
   }
 
@@ -212,13 +215,13 @@ export const useGameStore = defineStore('game', () => {
    */
   function getTierMultiplier(tier) {
     if (tier >= 1 && tier <= 2) {
-      return 1.10
+      return 1.1
     } else if (tier >= 3 && tier <= 5) {
       return 1.07
     } else if (tier >= 6 && tier <= 7) {
       return 1.05
     }
-    return 1.10
+    return 1.1
   }
 
   /**
@@ -233,7 +236,7 @@ export const useGameStore = defineStore('game', () => {
       console.warn(`Factory not found: ${factoryId}`)
       return 0n
     }
-    
+
     const multiplier = getTierMultiplier(factory.tier)
     return BigInt(Math.floor(factory.baseCost * Math.pow(multiplier, owned)))
   }
@@ -250,14 +253,14 @@ export const useGameStore = defineStore('game', () => {
       console.warn(`Factory not found: ${factoryId}`)
       return 0n
     }
-    
+
     const currentOwned = factoryCounts.value[factoryId] || 0
     let totalCost = 0n
-    
+
     for (let i = 0; i < count; i++) {
       totalCost += getFactoryCost(factoryId, currentOwned + i)
     }
-    
+
     // Apply 5% discount: totalCost * 95 / 100
     return (totalCost * 95n) / 100n
   }
@@ -274,16 +277,16 @@ export const useGameStore = defineStore('game', () => {
       console.warn(`Factory not found: ${factoryId}`)
       return false
     }
-    
+
     const cost = getBulkCost(factoryId, count)
-    
+
     if (qsos.value < cost) {
       return false
     }
-    
+
     qsos.value -= cost
     factoryCounts.value[factoryId] = (factoryCounts.value[factoryId] || 0) + count
-    
+
     return true
   }
 
@@ -399,7 +402,8 @@ export const useGameStore = defineStore('game', () => {
         fractionalQSOs: fractionalQSOs.value,
         audioSettings: audioSettings.value,
         lotteryState: lotteryState.value,
-        purchasedUpgrades: Array.from(purchasedUpgrades.value)
+        purchasedUpgrades: Array.from(purchasedUpgrades.value),
+        lastSaveTime: Date.now(),
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -419,12 +423,12 @@ export const useGameStore = defineStore('game', () => {
         licenseLevel.value = state.licenseLevel || 1
         factoryCounts.value = state.factoryCounts || {}
         fractionalQSOs.value = state.fractionalQSOs || 0
-        
+
         if (state.audioSettings) {
           audioSettings.value = {
             volume: state.audioSettings.volume ?? 0.5,
             frequency: state.audioSettings.frequency ?? 600,
-            isMuted: state.audioSettings.isMuted ?? false
+            isMuted: state.audioSettings.isMuted ?? false,
           }
         }
 
@@ -433,19 +437,47 @@ export const useGameStore = defineStore('game', () => {
           const now = Date.now()
           lotteryState.value = {
             lastTriggerTime: state.lotteryState.lastTriggerTime || 0,
-            isBonusAvailable: state.lotteryState.isBonusAvailable && now < state.lotteryState.bonusAvailableEndTime,
+            isBonusAvailable:
+              state.lotteryState.isBonusAvailable && now < state.lotteryState.bonusAvailableEndTime,
             bonusFactoryId: state.lotteryState.bonusFactoryId || null,
             bonusEndTime: state.lotteryState.bonusEndTime || 0,
             bonusAvailableEndTime: state.lotteryState.bonusAvailableEndTime || 0,
             phenomenonTitle: state.lotteryState.phenomenonTitle || '',
-            isSolarStorm: state.lotteryState.isSolarStorm && now < state.lotteryState.solarStormEndTime,
-            solarStormEndTime: state.lotteryState.solarStormEndTime || 0
+            isSolarStorm:
+              state.lotteryState.isSolarStorm && now < state.lotteryState.solarStormEndTime,
+            solarStormEndTime: state.lotteryState.solarStormEndTime || 0,
           }
         }
 
         // Restore purchased upgrades
         if (state.purchasedUpgrades) {
           purchasedUpgrades.value = new Set(state.purchasedUpgrades)
+        }
+
+        // Calculate offline progress
+        if (state.lastSaveTime) {
+          const now = Date.now()
+          const offlineMs = now - state.lastSaveTime
+          const offlineHours = offlineMs / (1000 * 60 * 60) // Convert to hours
+
+          // Only calculate if offline for more than 1 minute (to avoid spam on refresh)
+          if (offlineHours > 0.016) {
+            // 1 minute = ~0.016 hours
+            const productionRate = getTotalQSOsPerSecond()
+            const offlineQsos = calculateOfflineProgress(offlineHours, productionRate)
+
+            if (offlineQsos > 0) {
+              qsos.value = qsos.value + BigInt(offlineQsos)
+
+              // Store offline earnings info for UI display
+              const roundedHours = Math.min(Math.ceil(offlineHours), 24)
+              offlineEarnings.value = {
+                qsos: offlineQsos,
+                hours: roundedHours,
+                rate: productionRate,
+              }
+            }
+          }
         }
       }
     } catch (e) {
@@ -482,6 +514,35 @@ export const useGameStore = defineStore('game', () => {
     save()
   }
 
+  /**
+   * Calculates QSOs earned while offline.
+   * Formula: rate × hours × 0.5, capped at 24 hours
+   * @param {number} hours - Hours offline
+   * @param {number} rate - QSOs per second production rate
+   * @returns {number} QSOs earned (integer)
+   */
+  function calculateOfflineProgress(hours, rate) {
+    // Validate inputs
+    if (!hours || hours <= 0 || !rate || rate <= 0) {
+      return 0
+    }
+
+    // Cap at 24 hours maximum
+    const cappedHours = Math.min(hours, 24)
+
+    // Calculate: rate × hours × 3600 seconds/hour × 0.5 efficiency
+    const qsosEarned = rate * cappedHours * 3600 * 0.5
+
+    return Math.floor(qsosEarned)
+  }
+
+  /**
+   * Dismisses the offline earnings notification.
+   */
+  function dismissOfflineEarnings() {
+    offlineEarnings.value = null
+  }
+
   return {
     qsos,
     licenseLevel,
@@ -503,7 +564,10 @@ export const useGameStore = defineStore('game', () => {
     buyUpgrade,
     getUpgradeMultiplier,
     clearExpiredBonus,
+    offlineEarnings,
+    calculateOfflineProgress,
+    dismissOfflineEarnings,
     save,
-    load
+    load,
   }
 })

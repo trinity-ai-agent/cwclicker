@@ -33,6 +33,11 @@ export const useGameStore = defineStore('game', () => {
   const SOLAR_STORM_MULTIPLIER = 0.5 // 50% output reduction
   const SOLAR_STORM_DURATION_MS = 77000 // 77 seconds
 
+  // Offline progress constants
+  const MIN_OFFLINE_MINUTES = 1 // Minimum time offline to trigger calculation
+  const MAX_OFFLINE_HOURS = 24 // Maximum hours for offline earnings
+  const OFFLINE_EFFICIENCY = 0.5 // 50% efficiency for offline earnings
+
   // Random phenomena titles
   const PHENOMENA_TITLES = [
     'Rare DX',
@@ -404,6 +409,7 @@ export const useGameStore = defineStore('game', () => {
         lotteryState: lotteryState.value,
         purchasedUpgrades: Array.from(purchasedUpgrades.value),
         lastSaveTime: Date.now(),
+        offlineEarnings: offlineEarnings.value,
       }
       localStorage.setItem('cw-keyer-game', JSON.stringify(state))
     } catch (e) {
@@ -454,27 +460,37 @@ export const useGameStore = defineStore('game', () => {
           purchasedUpgrades.value = new Set(state.purchasedUpgrades)
         }
 
+        // Restore offline earnings notification if present and user hasn't dismissed it
+        if (state.offlineEarnings && state.offlineEarnings.qsos > 0) {
+          offlineEarnings.value = state.offlineEarnings
+        }
+
         // Calculate offline progress
         if (state.lastSaveTime) {
           const now = Date.now()
           const offlineMs = now - state.lastSaveTime
-          const offlineHours = offlineMs / (1000 * 60 * 60) // Convert to hours
 
-          // Only calculate if offline for more than 1 minute (to avoid spam on refresh)
-          if (offlineHours > 0.016) {
-            // 1 minute = ~0.016 hours
-            const productionRate = getTotalQSOsPerSecond()
-            const offlineQsos = calculateOfflineProgress(offlineHours, productionRate)
+          // Validate: must be positive (not a clock rollback) and not excessive
+          const MAX_REASONABLE_OFFLINE_MS = MAX_OFFLINE_HOURS * 60 * 60 * 1000 // 24 hours in ms
+          if (offlineMs > 0 && offlineMs <= MAX_REASONABLE_OFFLINE_MS) {
+            const offlineMinutes = offlineMs / (1000 * 60)
+            const offlineHours = offlineMs / (1000 * 60 * 60)
 
-            if (offlineQsos > 0) {
-              qsos.value = qsos.value + BigInt(offlineQsos)
+            // Only calculate if offline for more than minimum threshold
+            if (offlineMinutes >= MIN_OFFLINE_MINUTES) {
+              const productionRate = getTotalQSOsPerSecond()
+              const offlineQsos = calculateOfflineProgress(offlineHours, productionRate)
 
-              // Store offline earnings info for UI display
-              const roundedHours = Math.min(Math.ceil(offlineHours), 24)
-              offlineEarnings.value = {
-                qsos: offlineQsos,
-                hours: roundedHours,
-                rate: productionRate,
+              if (offlineQsos > 0 && Number.isSafeInteger(offlineQsos)) {
+                qsos.value = qsos.value + BigInt(offlineQsos)
+
+                // Store offline earnings info for UI display
+                const roundedHours = Math.min(Math.ceil(offlineHours), MAX_OFFLINE_HOURS)
+                offlineEarnings.value = {
+                  qsos: offlineQsos,
+                  hours: roundedHours,
+                  rate: productionRate,
+                }
               }
             }
           }
@@ -527,11 +543,12 @@ export const useGameStore = defineStore('game', () => {
       return 0
     }
 
-    // Cap at 24 hours maximum
-    const cappedHours = Math.min(hours, 24)
+    // Cap at maximum hours
+    const cappedHours = Math.min(hours, MAX_OFFLINE_HOURS)
 
-    // Calculate: rate × hours × 3600 seconds/hour × 0.5 efficiency
-    const qsosEarned = rate * cappedHours * 3600 * 0.5
+    // Calculate: rate × hours × 3600 seconds/hour × efficiency
+    // 50% efficiency means players earn half while offline (encourages active play)
+    const qsosEarned = rate * cappedHours * 3600 * OFFLINE_EFFICIENCY
 
     return Math.floor(qsosEarned)
   }

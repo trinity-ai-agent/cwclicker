@@ -13,6 +13,14 @@ vi.mock('../../stores/game', () => ({
 describe('MultiBuyPanel.vue', () => {
   const elmerFactory = FACTORIES.find(f => f.id === 'elmer')
 
+  const setMobileViewport = () => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 375,
+    })
+    window.dispatchEvent(new Event('resize'))
+  }
+
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
@@ -74,6 +82,43 @@ describe('MultiBuyPanel.vue', () => {
     expect(buttons[0].text()).toContain('10') // x1
     expect(buttons[1].text()).toContain('47') // x5 with discount
     expect(buttons[2].text()).toContain('95') // x10 with discount
+  })
+
+  it('renders x1 x5 and x10 buttons that stay visible and clickable on mobile', async () => {
+    setMobileViewport()
+
+    useGameStore.mockReturnValue({
+      qsos: 1000n,
+      factoryCounts: {},
+      getFactoryCost: () => 10n,
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95)),
+    })
+
+    const wrapper = mount(MultiBuyPanel, {
+      props: {
+        multiBuyAvailable: true,
+        factory: elmerFactory,
+      },
+    })
+
+    const buttons = wrapper.findAll('button')
+    expect(buttons.map(button => button.text().trim().split(':')[0])).toEqual([
+      '×1',
+      '×5',
+      '×10',
+    ])
+
+    for (const button of buttons) {
+      expect(button.isVisible()).toBe(true)
+      expect(button.attributes('disabled')).toBeUndefined()
+      await button.trigger('click')
+    }
+
+    expect(wrapper.emitted('buy')).toEqual([
+      [{ factory: elmerFactory, count: 1 }],
+      [{ factory: elmerFactory, count: 5 }],
+      [{ factory: elmerFactory, count: 10 }],
+    ])
   })
 
   it('emits buy event with count 1 on x1 button click', async () => {

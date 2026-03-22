@@ -20,10 +20,11 @@ const LICENSE_NAMES = {
 
 /**
  * QSO requirements for each license upgrade.
+ * Based on total QSOs earned (like experience points).
  */
 const LICENSE_COSTS = {
-  1: 10000n,
-  2: 100000n,
+  1: 50_000_000n,   // General: 50 million total QSOs earned
+  2: 500_000_000n,  // Extra: 500 million total QSOs earned
 }
 
 /**

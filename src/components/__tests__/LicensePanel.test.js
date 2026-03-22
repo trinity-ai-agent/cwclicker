@@ -38,13 +38,13 @@ describe('LicensePanel.vue', () => {
 
   it('shows correct QSO count and requirement', () => {
     useGameStore.mockReturnValue({
-      qsos: 2500,
+      qsos: 2500000,
       licenseLevel: 1,
     })
 
     const wrapper = mount(LicensePanel)
 
-    expect(wrapper.text()).toContain('2500/10000 QSOs')
+    expect(wrapper.text()).toContain('2500000/50000000 QSOs')
   })
 
   it('shows upgrade button when not maxed', () => {
@@ -72,7 +72,7 @@ describe('LicensePanel.vue', () => {
 
   it('enables upgrade button when can afford', () => {
     useGameStore.mockReturnValue({
-      qsos: 10000,
+      qsos: 50000000,
       licenseLevel: 1,
     })
 
@@ -84,7 +84,7 @@ describe('LicensePanel.vue', () => {
 
   it('emits upgrade event on button click', async () => {
     useGameStore.mockReturnValue({
-      qsos: 10000,
+      qsos: 50000000,
       licenseLevel: 1,
     })
 
@@ -96,9 +96,9 @@ describe('LicensePanel.vue', () => {
     expect(wrapper.emitted('upgrade')).toBeTruthy()
   })
 
-  it('deducts QSOs when upgrading to General', async () => {
+  it('allows upgrade to General with sufficient QSOs', async () => {
     const store = {
-      qsos: 10000n,
+      qsos: 50000000n,
       licenseLevel: 1,
     }
     useGameStore.mockReturnValue(store)
@@ -111,9 +111,9 @@ describe('LicensePanel.vue', () => {
     expect(wrapper.emitted('upgrade')).toBeTruthy()
   })
 
-  it('deducts QSOs when upgrading to Extra', async () => {
+  it('allows upgrade to Extra with sufficient QSOs', async () => {
     const store = {
-      qsos: 100000n,
+      qsos: 500000000n,
       licenseLevel: 2,
     }
     useGameStore.mockReturnValue(store)
@@ -156,15 +156,15 @@ describe('LicensePanel.vue', () => {
     })
   })
 
-  it('shows correct requirements for General upgrade', () => {
+  it('shows correct requirements for Extra upgrade', () => {
     useGameStore.mockReturnValue({
-      qsos: 25000,
+      qsos: 250000000,
       licenseLevel: 2,
     })
 
     const wrapper = mount(LicensePanel)
 
     expect(wrapper.text()).toContain('Progress to Extra')
-    expect(wrapper.text()).toContain('25000/100000 QSOs')
+    expect(wrapper.text()).toContain('250000000/500000000 QSOs')
   })
 })

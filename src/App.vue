@@ -45,12 +45,13 @@ onMounted(() => {
 })
 
 const handleLicenseUpgrade = () => {
-  if (store.licenseLevel === 1 && store.qsos >= 10000n) {
+  // License upgrades based on total QSOs earned (like experience points)
+  // General: 50 million total QSOs earned
+  // Extra: 500 million total QSOs earned
+  if (store.licenseLevel === 1 && store.totalQsosEarned >= 50_000_000n) {
     store.licenseLevel = 2
-    store.qsos -= 10000n
-  } else if (store.licenseLevel === 2 && store.qsos >= 100000n) {
+  } else if (store.licenseLevel === 2 && store.totalQsosEarned >= 500_000_000n) {
     store.licenseLevel = 3
-    store.qsos -= 100000n
   }
 }
 

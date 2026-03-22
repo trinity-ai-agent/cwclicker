@@ -4,9 +4,9 @@ import { describe, it, expect } from 'vitest';
 import { FACTORIES, TIER_SCALING } from '../factories';
 
 describe('FACTORIES', () => {
-  it('exports an array of 21 factories', () => {
+  it('exports an array of 27 factories', () => {
     expect(Array.isArray(FACTORIES)).toBe(true);
-    expect(FACTORIES).toHaveLength(21);
+    expect(FACTORIES).toHaveLength(27);
   });
 
   describe('factory structure', () => {
@@ -31,7 +31,7 @@ describe('FACTORIES', () => {
         expect(factory).toHaveProperty('tier');
         expect(typeof factory.tier).toBe('number');
         expect(factory.tier).toBeGreaterThanOrEqual(1);
-        expect(factory.tier).toBeLessThanOrEqual(7);
+        expect(factory.tier).toBeLessThanOrEqual(9);
 
         expect(factory).toHaveProperty('description');
         expect(typeof factory.description).toBe('string');
@@ -52,11 +52,11 @@ describe('FACTORIES', () => {
     });
   });
 
-  describe('Technician tier (1-2)', () => {
-    const techFactories = FACTORIES.filter(f => f.tier >= 1 && f.tier <= 2);
+  describe('Technician tier (1-3)', () => {
+    const techFactories = FACTORIES.filter(f => f.tier >= 1 && f.tier <= 3);
 
-    it('has 6 factories', () => {
-      expect(techFactories).toHaveLength(6);
+    it('has 9 factories', () => {
+      expect(techFactories).toHaveLength(9);
     });
 
     it('has correct data for QRQ Protocol', () => {
@@ -123,11 +123,20 @@ describe('FACTORIES', () => {
     });
   });
 
-  describe('General tier (3-5)', () => {
-    const generalFactories = FACTORIES.filter(f => f.tier >= 3 && f.tier <= 5);
+  describe('General tier (4-6)', () => {
+    const generalFactories = FACTORIES.filter(f => f.tier >= 4 && f.tier <= 6);
 
     it('has 9 factories', () => {
       expect(generalFactories).toHaveLength(9);
+    });
+
+    it('has correct data for Bug Catcher', () => {
+      const bugCatcher = FACTORIES.find(f => f.id === 'bug-catcher');
+      expect(bugCatcher).toBeDefined();
+      expect(bugCatcher.name).toBe('Bug Catcher');
+      expect(bugCatcher.baseCost).toBe(3500);
+      expect(bugCatcher.qsosPerSecond).toBe(6.0);
+      expect(bugCatcher.tier).toBe(3);
     });
 
     it('has correct data for Vertical Antenna', () => {
@@ -154,7 +163,16 @@ describe('FACTORIES', () => {
       expect(beam.name).toBe('Beam Antenna');
       expect(beam.baseCost).toBe(25000);
       expect(beam.qsosPerSecond).toBe(30.0);
-      expect(beam.tier).toBe(3);
+      expect(beam.tier).toBe(4);
+    });
+
+    it('has correct data for Ragchew Net', () => {
+      const ragchew = FACTORIES.find(f => f.id === 'ragchew-net');
+      expect(ragchew).toBeDefined();
+      expect(ragchew.name).toBe('Ragchew Net');
+      expect(ragchew.baseCost).toBe(35000);
+      expect(ragchew.qsosPerSecond).toBe(45.0);
+      expect(ragchew.tier).toBe(4);
     });
 
     it('has correct data for Tower Installation', () => {
@@ -172,7 +190,16 @@ describe('FACTORIES', () => {
       expect(contest.name).toBe('Contest Station');
       expect(contest.baseCost).toBe(100000);
       expect(contest.qsosPerSecond).toBe(120.0);
-      expect(contest.tier).toBe(4);
+      expect(contest.tier).toBe(5);
+    });
+
+    it('has correct data for Paper Logbook', () => {
+      const paperLogbook = FACTORIES.find(f => f.id === 'paper-logbook');
+      expect(paperLogbook).toBeDefined();
+      expect(paperLogbook.name).toBe('Paper Logbook');
+      expect(paperLogbook.baseCost).toBe(175000);
+      expect(paperLogbook.qsosPerSecond).toBe(180.0);
+      expect(paperLogbook.tier).toBe(5);
     });
 
     it('has correct data for DX Cluster', () => {
@@ -181,7 +208,7 @@ describe('FACTORIES', () => {
       expect(cluster.name).toBe('DX Cluster');
       expect(cluster.baseCost).toBe(250000);
       expect(cluster.qsosPerSecond).toBe(250.0);
-      expect(cluster.tier).toBe(4);
+      expect(cluster.tier).toBe(5);
     });
 
     it('has correct data for Hamfest', () => {
@@ -190,7 +217,7 @@ describe('FACTORIES', () => {
       expect(hamfest.name).toBe('Hamfest');
       expect(hamfest.baseCost).toBe(500000);
       expect(hamfest.qsosPerSecond).toBe(500.0);
-      expect(hamfest.tier).toBe(5);
+      expect(hamfest.tier).toBe(6);
     });
 
     it('has correct data for QSL Card Printer', () => {
@@ -199,7 +226,7 @@ describe('FACTORIES', () => {
       expect(printer.name).toBe('QSL Card Printer');
       expect(printer.baseCost).toBe(1000000);
       expect(printer.qsosPerSecond).toBe(1000.0);
-      expect(printer.tier).toBe(5);
+      expect(printer.tier).toBe(6);
     });
 
     it('has correct data for Remote Station', () => {
@@ -208,15 +235,15 @@ describe('FACTORIES', () => {
       expect(remote.name).toBe('Remote Station');
       expect(remote.baseCost).toBe(2500000);
       expect(remote.qsosPerSecond).toBe(2500.0);
-      expect(remote.tier).toBe(5);
+      expect(remote.tier).toBe(6);
     });
   });
 
-  describe('Extra tier (6-7)', () => {
-    const extraFactories = FACTORIES.filter(f => f.tier >= 6 && f.tier <= 7);
+  describe('Extra tier (7-9)', () => {
+    const extraFactories = FACTORIES.filter(f => f.tier >= 7 && f.tier <= 9);
 
-    it('has 6 factories', () => {
-      expect(extraFactories).toHaveLength(6);
+    it('has 9 factories', () => {
+      expect(extraFactories).toHaveLength(9);
     });
 
     it('has correct data for FT8 Bot', () => {
@@ -225,7 +252,16 @@ describe('FACTORIES', () => {
       expect(ft8.name).toBe('FT8 Bot');
       expect(ft8.baseCost).toBe(5000000);
       expect(ft8.qsosPerSecond).toBe(5000.0);
-      expect(ft8.tier).toBe(6);
+      expect(ft8.tier).toBe(7);
+    });
+
+    it('has correct data for Digital Interface', () => {
+      const digitalInterface = FACTORIES.find(f => f.id === 'digital-interface');
+      expect(digitalInterface).toBeDefined();
+      expect(digitalInterface.name).toBe('Digital Interface');
+      expect(digitalInterface.baseCost).toBe(7500000);
+      expect(digitalInterface.qsosPerSecond).toBe(7500.0);
+      expect(digitalInterface.tier).toBe(7);
     });
 
     it('has correct data for Cluster Spotting Network', () => {
@@ -234,7 +270,7 @@ describe('FACTORIES', () => {
       expect(cluster.name).toBe('Cluster Spotting Network');
       expect(cluster.baseCost).toBe(10000000);
       expect(cluster.qsosPerSecond).toBe(10000.0);
-      expect(cluster.tier).toBe(6);
+      expect(cluster.tier).toBe(7);
     });
 
     it('has correct data for EME Moonbounce', () => {
@@ -243,7 +279,16 @@ describe('FACTORIES', () => {
       expect(eme.name).toBe('EME Moonbounce');
       expect(eme.baseCost).toBe(25000000);
       expect(eme.qsosPerSecond).toBe(25000.0);
-      expect(eme.tier).toBe(6);
+      expect(eme.tier).toBe(8);
+    });
+
+    it('has correct data for Lunar Repeater', () => {
+      const lunar = FACTORIES.find(f => f.id === 'lunar-repeater');
+      expect(lunar).toBeDefined();
+      expect(lunar.name).toBe('Lunar Repeater');
+      expect(lunar.baseCost).toBe(37500000);
+      expect(lunar.qsosPerSecond).toBe(37500.0);
+      expect(lunar.tier).toBe(8);
     });
 
     it('has correct data for Satellite Constellation', () => {
@@ -252,7 +297,7 @@ describe('FACTORIES', () => {
       expect(sat.name).toBe('Satellite Constellation');
       expect(sat.baseCost).toBe(50000000);
       expect(sat.qsosPerSecond).toBe(50000.0);
-      expect(sat.tier).toBe(7);
+      expect(sat.tier).toBe(8);
     });
 
     it('has correct data for Ionospheric Modification', () => {
@@ -261,7 +306,16 @@ describe('FACTORIES', () => {
       expect(iono.name).toBe('Ionospheric Modification');
       expect(iono.baseCost).toBe(100000000);
       expect(iono.qsosPerSecond).toBe(100000.0);
-      expect(iono.tier).toBe(7);
+      expect(iono.tier).toBe(9);
+    });
+
+    it('has correct data for Time Travel DX', () => {
+      const timeTravel = FACTORIES.find(f => f.id === 'time-travel-dx');
+      expect(timeTravel).toBeDefined();
+      expect(timeTravel.name).toBe('Time Travel DX');
+      expect(timeTravel.baseCost).toBe(250000000);
+      expect(timeTravel.qsosPerSecond).toBe(250000.0);
+      expect(timeTravel.tier).toBe(9);
     });
 
     it('has correct data for Alternate Dimension DXCC', () => {
@@ -270,7 +324,7 @@ describe('FACTORIES', () => {
       expect(alternate.name).toBe('Alternate Dimension DXCC');
       expect(alternate.baseCost).toBe(500000000);
       expect(alternate.qsosPerSecond).toBe(500000.0);
-      expect(alternate.tier).toBe(7);
+      expect(alternate.tier).toBe(9);
     });
   });
 

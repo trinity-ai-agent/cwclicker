@@ -13,7 +13,7 @@ import MultiBuyPanel from './components/MultiBuyPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import ErrorBoundary from './components/ErrorBoundary.vue'
 import OfflineProgressNotification from './components/OfflineProgressNotification.vue'
-import { FACTORIES } from './constants/factories'
+import { FACTORIES, getMaxTierForLicense } from './constants/factories'
 import GameLoop from './components/GameLoop.vue'
 
 const store = useGameStore()
@@ -45,12 +45,13 @@ onMounted(() => {
 })
 
 const handleLicenseUpgrade = () => {
-  if (store.licenseLevel === 1 && store.qsos >= 10000n) {
+  // License upgrades based on total QSOs earned (like experience points)
+  // General: 50 million total QSOs earned
+  // Extra: 500 million total QSOs earned
+  if (store.licenseLevel === 1 && store.totalQsosEarned >= 50_000_000n) {
     store.licenseLevel = 2
-    store.qsos -= 10000n
-  } else if (store.licenseLevel === 2 && store.qsos >= 100000n) {
+  } else if (store.licenseLevel === 2 && store.totalQsosEarned >= 500_000_000n) {
     store.licenseLevel = 3
-    store.qsos -= 100000n
   }
 }
 
@@ -77,7 +78,8 @@ const handleSolarStormStarted = () => {
 }
 
 const availableFactories = computed(() => {
-  return FACTORIES.filter(f => f.tier <= store.licenseLevel)
+  const maxTier = getMaxTierForLicense(store.licenseLevel)
+  return FACTORIES.filter(f => f.tier <= maxTier)
 })
 
 const totalFactoryCount = computed(() => {

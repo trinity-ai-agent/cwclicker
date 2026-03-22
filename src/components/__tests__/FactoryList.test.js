@@ -55,8 +55,8 @@ describe('FactoryList.vue', () => {
     expect(wrapper.text()).toContain('Straight Key')  // tier 1
     expect(wrapper.text()).toContain('Paddle Key')  // tier 2
     expect(wrapper.text()).toContain('Vertical Antenna')  // tier 3
-    expect(wrapper.text()).toContain('FT8 Bot')  // tier 6 is visible
-    expect(wrapper.text()).not.toContain('Satellite Constellation')  // tier 7 is filtered
+    expect(wrapper.text()).toContain('Hamfest')  // tier 6 is visible
+    expect(wrapper.text()).not.toContain('FT8 Bot')  // tier 7 is filtered
   })
 
   it('shows total QSOs per second', () => {

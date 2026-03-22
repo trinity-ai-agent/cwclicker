@@ -11,6 +11,7 @@ export const useGameStore = defineStore('game', () => {
    * @returns {bigint} QSO value as BigInt
    */
   const qsos = ref(0n)
+  const totalQsosEarned = ref(0n) // Total QSOs earned for prestige system
   const licenseLevel = ref(1)
   const factoryCounts = ref({})
   const fractionalQSOs = ref(0) // Accumulate fractional QSOs between frames
@@ -69,9 +70,9 @@ export const useGameStore = defineStore('game', () => {
    */
   function tapKeyer(type) {
     if (type === 'dit') {
-      qsos.value += 1n
+      addQSOs(1n)
     } else if (type === 'dah') {
-      qsos.value += 2n
+      addQSOs(2n)
     } else {
       console.warn(`Invalid keyer tap type: ${type}`)
     }
@@ -209,8 +210,18 @@ export const useGameStore = defineStore('game', () => {
     const wholeQsos = Math.floor(fractionalQSOs.value)
     if (wholeQsos > 0) {
       qsos.value = qsos.value + BigInt(wholeQsos)
+      totalQsosEarned.value += BigInt(wholeQsos)
       fractionalQSOs.value -= wholeQsos
     }
+  }
+
+  /**
+   * Adds QSOs from keyer taps.
+   * @param {bigint} amount - The amount of QSOs to add.
+   */
+  function addQSOs(amount) {
+    qsos.value += amount
+    totalQsosEarned.value += amount
   }
 
   /**
@@ -402,6 +413,7 @@ export const useGameStore = defineStore('game', () => {
     try {
       const state = {
         qsos: qsos.value.toString(),
+        totalQsosEarned: totalQsosEarned.value.toString(),
         licenseLevel: licenseLevel.value,
         factoryCounts: factoryCounts.value,
         fractionalQSOs: fractionalQSOs.value,
@@ -426,6 +438,7 @@ export const useGameStore = defineStore('game', () => {
       if (saved) {
         const state = JSON.parse(saved)
         qsos.value = BigInt(state.qsos || '0')
+        totalQsosEarned.value = BigInt(state.totalQsosEarned || state.qsos || '0')
         licenseLevel.value = state.licenseLevel || 1
         factoryCounts.value = state.factoryCounts || {}
         fractionalQSOs.value = state.fractionalQSOs || 0
@@ -562,6 +575,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     qsos,
+    totalQsosEarned,
     licenseLevel,
     factoryCounts,
     fractionalQSOs,
@@ -570,6 +584,7 @@ export const useGameStore = defineStore('game', () => {
     purchasedUpgrades,
     tapKeyer,
     addPassiveQSOs,
+    addQSOs,
     getFactoryCost,
     getBulkCost,
     buyFactory,

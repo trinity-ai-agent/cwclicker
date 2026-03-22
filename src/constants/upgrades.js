@@ -15,6 +15,17 @@
 const UPGRADE_THRESHOLDS = [1, 5, 25, 50, 100, 150, 200, 250, 300];
 
 /**
+ * License unlock costs (for future use - currently handled by tier visibility)
+ * Tier visibility is controlled by LICENSE_TIER_RANGES in factories.js
+ * @type {Object}
+ */
+export const LICENSE_COSTS = {
+  1: 0n,                    // Start as Technician
+  2: 50_000_000n,         // General at 50 million total QSOs earned
+  3: 500_000_000n         // Extra at 500 million total QSOs earned
+};
+
+/**
  * Generate upgrades for a factory following Cookie Clicker pattern
  * Each upgrade doubles output (2x) and costs baseCost × 10^(threshold tier)
  * @param {string} factoryId - Factory ID

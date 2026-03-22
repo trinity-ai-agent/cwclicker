@@ -129,11 +129,11 @@ function handleTabKeydown(event, tabId) {
     <!-- Migration Notification Modal -->
     <MigrationNotification />
 
-    <div class="min-h-screen p-8 max-w-4xl mx-auto">
+    <div class="min-h-screen px-4 sm:px-8 py-8 max-w-4xl mx-auto">
       <StatHeader />
       <LicensePanel @upgrade="handleLicenseUpgrade" />
       <main class="space-y-6">
-        <div class="flex gap-4">
+        <div class="flex flex-col md:flex-row gap-2 md:gap-4">
           <div class="flex-1">
             <KeyerArea @tap="handleKeyerTap" />
           </div>

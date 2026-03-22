@@ -80,7 +80,7 @@
 - [ ] **SAVE-04**: Handle localStorage errors gracefully
 - [ ] **SAVE-05**: Export save data (base64 to clipboard)
 - [ ] **SAVE-06**: Import save data (paste base64)
-- [ ] **SAVE-07**: Offline progress calculation (rate × hours × 0.5, max 24h)
+- [x] **SAVE-07**: Offline progress calculation (rate × hours × 0.5, max 24h)
 
 ### Accessibility
 

@@ -44,9 +44,12 @@ Create `src/utils/format.js` with a single `formatNumber()` function.
 **Rules:**
 
 - Start abbreviating at exactly 1000 (not before)
-- Always show 2 significant digits after the decimal
-- `1000` → `1.00K`, `1010` → `1.01K`, `1100` → `1.10K`
+- Variable precision based on magnitude:
+  - `>= 100`: 0 decimal places (e.g., `100K`, `999Qa`)
+  - `>= 10`: 1 decimal place (e.g., `10.0K`, `9.7Qa`)
+  - `< 10`: 2 decimal places (e.g., `1.00K`, `9.01Qa`)
 - Cap at Qi (quintillion) - no larger suffixes
+- Uses bigint math for bigint inputs to avoid precision loss above Number.MAX_SAFE_INTEGER
 
 ### Implementation Details
 
@@ -54,9 +57,9 @@ Create `src/utils/format.js` with a single `formatNumber()` function.
 
 1. Handle edge cases: null, undefined, negative numbers
 2. If value < 1000, return as-is (full number)
-3. Iterate through suffixes in order (K, M, B, T, Qa, Qi)
-4. Divide by 1000 for each step
-5. Return formatted string with 2 decimal places + suffix
+3. For bigint inputs: use bigint division and modulo to calculate decimal part
+4. For number inputs: use Number math with variable precision
+5. Return formatted string with appropriate decimal places based on magnitude
 
 **Function Signature:**
 

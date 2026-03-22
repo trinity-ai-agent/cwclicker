@@ -26,6 +26,17 @@ describe('formatNumber', () => {
     expect(formatNumber(1000n)).toBe('1.00K')
   })
 
+  test('handles BigInt above Number.MAX_SAFE_INTEGER without precision loss', () => {
+    const hugeNumber = 9007199254740993n
+    expect(formatNumber(hugeNumber)).toBe('9.00Qa')
+  })
+
+  test('handles very large BigInt values', () => {
+    expect(formatNumber(1000000000000000000n)).toBe('1.00Qi')
+    expect(formatNumber(1234567890000000000n)).toBe('1.23Qi')
+    expect(formatNumber(100000000000000000n)).toBe('100Qa')
+  })
+
   test('handles string input', () => {
     expect(formatNumber('1000')).toBe('1.00K')
   })

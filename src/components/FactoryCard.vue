@@ -61,6 +61,8 @@ const effectivePerFactoryRate = computed(() => {
   return props.factory.qsosPerSecond * upgradeMultiplier
 })
 
+const formatRate = value => `${value.toFixed(1)}`
+
 /**
  * Calculates how many more QSOs are needed to afford this factory.
  */
@@ -119,7 +121,12 @@ const purchasedCount = computed(() => {
 /**
  * Show expand/collapse for purchased list
  */
-const showAllPurchased = ref(false)
+const showPurchasedUpgrades = ref(false)
+
+/**
+ * Show expand/collapse for next upgrade teaser
+ */
+const showUpgradeDetails = ref(false)
 
 /**
  * Handle buying an upgrade
@@ -133,54 +140,51 @@ function handleBuyUpgrade() {
 </script>
 
 <template>
-  <div class="border-2 border-terminal-green bg-terminal-bg p-4 rounded">
+  <div class="rounded border-2 border-terminal-green bg-terminal-bg p-4">
     <!-- Factory header with icon -->
-    <div class="flex justify-between items-start mb-2">
-      <h3 class="text-xl font-bold text-terminal-green">{{ factory.icon }} {{ factory.name }}</h3>
+    <div class="mb-3 flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xl">{{ factory.icon }}</span>
+          <span
+            v-if="ownedCount > 0"
+            class="rounded-full border border-terminal-amber/50 px-2 py-0.5 text-xs font-semibold text-terminal-amber"
+          >
+            Owned {{ ownedCount }}
+          </span>
+        </div>
+        <h3 class="mt-1 text-xl font-bold text-terminal-green">{{ factory.name }}</h3>
+      </div>
       <span class="text-sm text-terminal-amber">[Tier {{ factory.tier }}]</span>
     </div>
 
     <p class="text-sm text-gray-400 mb-3">{{ factory.description }}</p>
 
     <!-- Production info -->
-    <div class="flex justify-between items-center mb-4">
-      <div class="text-terminal-green">
-        <span v-if="ownedCount > 0" class="text-terminal-amber font-semibold mr-4">
-          {{ actualOutput.toFixed(1) }}/sec
-        </span>
-        <span class="text-sm text-gray-500">
-          ({{ effectivePerFactoryRate.toFixed(1) }}/sec each
-          <span
-            v-if="effectivePerFactoryRate > factory.qsosPerSecond"
-            class="text-terminal-amber ml-1"
-          >
-            ×{{ (effectivePerFactoryRate / factory.qsosPerSecond).toFixed(0) }}
-          </span>
-          )
-        </span>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <span class="text-terminal-green">{{ formatNumber(currentCost) }}</span>
-        <span v-if="ownedCount > 0" class="text-terminal-amber text-sm">
-          Owned: {{ ownedCount }}
-        </span>
-        <button
-          @click="handleBuy"
-          :disabled="!canAfford"
-          class="px-4 py-1 rounded font-bold transition-colors"
-          :class="{
-            'bg-terminal-green text-terminal-bg hover:bg-green-600': canAfford,
-            'bg-gray-700 text-gray-400 opacity-50 cursor-not-allowed': !canAfford,
-          }"
-        >
-          Buy
-        </button>
+    <div class="mb-4 space-y-1" data-testid="factory-production">
+      <div class="text-terminal-amber font-semibold">{{ formatRate(actualOutput) }}/sec</div>
+      <div class="text-sm text-gray-500">
+        ({{ formatRate(effectivePerFactoryRate) }}/sec × {{ currentMultiplier }} × {{ ownedCount }})
       </div>
     </div>
 
+    <div class="mb-4 flex items-center justify-between gap-3" data-testid="factory-action-row">
+      <span class="text-terminal-green">{{ formatNumber(currentCost) }}</span>
+      <button
+        @click="handleBuy"
+        :disabled="!canAfford"
+        class="rounded px-4 py-1 font-bold transition-colors"
+        :class="{
+          'bg-terminal-green text-terminal-bg hover:bg-green-600': canAfford,
+          'bg-gray-700 text-gray-400 opacity-50 cursor-not-allowed': !canAfford,
+        }"
+      >
+        Buy
+      </button>
+    </div>
+
     <!-- Multiplier badges -->
-    <div v-if="currentMultiplier > 1 || nextUpgrade" class="mb-4">
+    <div v-if="currentMultiplier > 1 || nextUpgrade" class="mb-4 hidden sm:block" data-testid="upgrade-badge-row">
       <div class="flex items-center gap-1 text-sm">
         <span class="text-gray-500">Upgrades:</span>
         <span
@@ -199,22 +203,17 @@ function handleBuyUpgrade() {
 
     <!-- Next Upgrade Section -->
     <div v-if="nextUpgrade" class="border border-terminal-green/50 rounded p-3 mb-3">
-      <div class="text-xs text-terminal-amber uppercase mb-1">Next Upgrade</div>
-      <div class="flex justify-between items-center">
+      <div class="mb-2 flex items-start justify-between gap-3">
         <div>
-          <span class="text-terminal-green font-bold"
-            >{{ nextUpgrade.icon }} {{ nextUpgrade.name }}</span
-          >
-          <span class="text-sm text-gray-400 ml-2">
-            {{ formatNumber(currentMultiplier) }}x → {{ formatNumber(currentMultiplier * 2) }}x
-          </span>
+          <div class="text-xs uppercase text-terminal-amber">Next Upgrade</div>
+          <div class="mt-1 font-bold text-terminal-green">{{ nextUpgrade.icon }} {{ nextUpgrade.name }}</div>
         </div>
-        <div class="flex items-center gap-3">
-          <span class="text-terminal-green">{{ formatNumber(nextUpgrade.baseCost) }}</span>
+        <div class="text-right">
+          <div class="text-terminal-green">{{ formatNumber(nextUpgrade.baseCost) }}</div>
           <button
             @click="handleBuyUpgrade"
             :disabled="!canAffordUpgrade"
-            class="px-3 py-1 rounded font-bold text-sm"
+            class="mt-1 rounded px-3 py-1 text-sm font-bold"
             :class="{
               'bg-terminal-amber text-terminal-bg hover:bg-amber-600': canAffordUpgrade,
               'bg-gray-700 text-gray-400 opacity-50 cursor-not-allowed': !canAffordUpgrade,
@@ -224,37 +223,42 @@ function handleBuyUpgrade() {
           </button>
         </div>
       </div>
+
+      <p class="text-sm text-gray-400">
+        {{ nextUpgrade.description }}
+      </p>
+
+      <div class="mt-2 flex items-center justify-between gap-3 text-xs text-gray-500">
+        <span v-if="showUpgradeDetails">Unlocks at {{ nextUpgrade.threshold }} factories.</span>
+        <button
+          type="button"
+          class="uppercase tracking-wide text-terminal-amber"
+          @click="showUpgradeDetails = !showUpgradeDetails"
+        >
+          {{ showUpgradeDetails ? 'Hide details' : 'Show details' }}
+        </button>
+      </div>
     </div>
 
     <!-- Latest Purchased Section -->
     <div v-if="purchasedCount > 0">
       <div class="border border-gray-600 rounded p-3">
         <div
-          @click="showAllPurchased = !showAllPurchased"
+          @click="showPurchasedUpgrades = !showPurchasedUpgrades"
+          data-testid="purchased-upgrades-toggle"
           class="flex justify-between items-center cursor-pointer"
         >
           <div>
             <span class="text-xs text-gray-400 uppercase">Latest Purchased</span>
             <span class="text-xs text-gray-500 ml-2">({{ purchasedCount }})</span>
           </div>
-          <span class="text-gray-500">{{ showAllPurchased ? '▲' : '▼' }}</span>
-        </div>
-
-        <!-- Latest (always visible) -->
-        <div class="mt-2 text-terminal-green">
-          ✓ {{ purchasedUpgrades[0].icon }} {{ purchasedUpgrades[0].name }}
-          <span class="text-gray-400">
-            {{ formatNumber(currentMultiplier / 2) }}x → {{ formatNumber(currentMultiplier) }}x
-          </span>
+          <span class="text-gray-500">{{ showPurchasedUpgrades ? '▲' : '▼' }}</span>
         </div>
 
         <!-- All purchased (expandable) -->
-        <div
-          v-if="showAllPurchased && purchasedCount > 1"
-          class="mt-2 pl-4 border-l-2 border-gray-600"
-        >
+        <div v-if="showPurchasedUpgrades" class="mt-2 pl-4 border-l-2 border-gray-600">
           <div
-            v-for="upgrade in purchasedUpgrades.slice(1)"
+            v-for="upgrade in purchasedUpgrades"
             :key="upgrade.id"
             class="text-terminal-green text-sm py-1"
           >

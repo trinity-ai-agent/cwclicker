@@ -159,6 +159,25 @@ describe('FactoryCard.vue', () => {
     expect(wrapper.get('[data-testid="upgrade-badge-row"]').classes()).toContain('sm:block')
   })
 
+  it('shows a compact upgrade summary on mobile', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => 4,
+      getAvailableUpgrades: () => [elmerUpgrade],
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    const summary = wrapper.get('[data-testid="upgrade-summary-mobile"]')
+    expect(summary.classes()).toContain('sm:hidden')
+    expect(summary.text()).toContain('4x active')
+    expect(summary.text()).toContain('8 more')
+  })
+
   it('disables buy button when cannot afford', () => {
     mockStore({ qsos: 5 })
 

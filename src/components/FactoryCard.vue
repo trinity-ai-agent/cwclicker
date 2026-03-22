@@ -103,6 +103,22 @@ const currentMultiplier = computed(() => {
   return store.getUpgradeMultiplier(props.factory.id)
 })
 
+const upgradeBadgeLevels = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+
+const upgradeProgressSummary = computed(() => {
+  const activeLevel = upgradeBadgeLevels.reduce((highest, level) => {
+    return currentMultiplier.value >= level ? level : highest
+  }, 1)
+
+  const remainingCount = upgradeBadgeLevels.filter(level => level > currentMultiplier.value).length
+
+  if (remainingCount === 0) {
+    return `${activeLevel}x active`
+  }
+
+  return `${activeLevel}x active • ${remainingCount} more`
+})
+
 /**
  * Can afford the next upgrade?
  */
@@ -184,11 +200,17 @@ function handleBuyUpgrade() {
     </div>
 
     <!-- Multiplier badges -->
+    <div v-if="currentMultiplier > 1 || nextUpgrade" class="mb-4 sm:hidden" data-testid="upgrade-summary-mobile">
+      <div class="text-xs text-gray-500">
+        {{ upgradeProgressSummary }}
+      </div>
+    </div>
+
     <div v-if="currentMultiplier > 1 || nextUpgrade" class="mb-4 hidden sm:block" data-testid="upgrade-badge-row">
       <div class="flex items-center gap-1 text-sm">
         <span class="text-gray-500">Upgrades:</span>
         <span
-          v-for="mult in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]"
+          v-for="mult in upgradeBadgeLevels"
           :key="mult"
           class="px-2 py-0.5 rounded text-xs"
           :class="{

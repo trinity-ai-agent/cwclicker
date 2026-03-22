@@ -254,7 +254,7 @@ function handleBuyUpgrade() {
           class="mt-2 pl-4 border-l-2 border-gray-600"
         >
           <div
-            v-for="(upgrade, index) in purchasedUpgrades.slice(1)"
+            v-for="upgrade in purchasedUpgrades.slice(1)"
             :key="upgrade.id"
             class="text-terminal-green text-sm py-1"
           >

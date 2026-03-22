@@ -1,13 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useGameStore } from './stores/game'
+import { formatNumber } from './utils/format'
 import { audioService } from './services/audio'
 import StatHeader from './components/StatHeader.vue'
 import LicensePanel from './components/LicensePanel.vue'
 import KeyerArea from './components/KeyerArea.vue'
 import ClickIndicator from './components/ClickIndicator.vue'
 import RareDxBonus from './components/RareDxBonus.vue'
-import UpgradePanel from './components/UpgradePanel.vue'
 import FactoryCard from './components/FactoryCard.vue'
 import MultiBuyPanel from './components/MultiBuyPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
@@ -27,7 +27,6 @@ const appVersion = __APP_VERSION__ || 'v0.0.0-0-unknown'
 const tabs = [
   { id: 'store', label: 'Store' },
   { id: 'bulk', label: 'Bulk Buy' },
-  { id: 'upgrades', label: 'Upgrades' },
   { id: 'settings', label: 'Settings' },
 ]
 
@@ -189,9 +188,7 @@ function handleTabKeydown(event, tabId) {
                     Producing: {{ store.getTotalQSOsPerSecond().toFixed(1) }} QSOs/sec
                   </p>
                 </div>
-                <span class="text-terminal-green text-lg"
-                  >{{ store.qsos.toLocaleString() }} QSOs</span
-                >
+                <span class="text-terminal-green text-lg">{{ formatNumber(store.qsos) }} QSOs</span>
               </div>
 
               <div class="space-y-4">
@@ -238,16 +235,6 @@ function handleTabKeydown(event, tabId) {
                   Current: {{ totalFactoryCount }}/10 factories
                 </p>
               </div>
-            </div>
-
-            <!-- Upgrades Tab -->
-            <div
-              v-if="activeTab === 'upgrades'"
-              id="panel-upgrades"
-              role="tabpanel"
-              aria-labelledby="tab-upgrades"
-            >
-              <UpgradePanel />
             </div>
 
             <!-- Settings Tab -->

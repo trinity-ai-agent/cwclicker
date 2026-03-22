@@ -12,7 +12,7 @@ const BIGINT_DIVISORS = [
 
 /**
  * Formats a number with compact notation (K, M, B, T, Qa, Qi)
- * Uses bigint math for bigint inputs to avoid precision loss.
+ * Uses bigint math for bigint and integer-string inputs to avoid precision loss.
  * @param {number|string|bigint} value - The number to format
  * @returns {string} Formatted string (e.g., "1.23K", "999")
  */
@@ -26,11 +26,20 @@ export function formatNumber(value) {
   }
 
   if (typeof value === 'string') {
-    const parsed = parseFloat(value)
+    const trimmed = value.trim()
+    if (trimmed === '') {
+      return '0'
+    }
+
+    if (/^-?\d+$/.test(trimmed)) {
+      return formatBigInt(BigInt(trimmed))
+    }
+
+    const parsed = parseFloat(trimmed)
     if (isNaN(parsed)) {
       return '0'
     }
-    return formatNumber(parsed)
+    return formatNumberInternal(parsed)
   }
 
   if (typeof value === 'number') {
@@ -47,21 +56,26 @@ export function formatNumber(value) {
  * Formats a number using Number math (for regular numbers)
  */
 function formatNumberInternal(num) {
-  if (num < 1000) {
+  const isNegative = num < 0
+  const absNum = Math.abs(num)
+
+  if (absNum < 1000) {
     return num.toString()
   }
 
   for (let i = BIGINT_DIVISORS.length - 1; i >= 1; i--) {
     const divisor = Number(BIGINT_DIVISORS[i])
-    if (num >= divisor) {
-      const scaled = num / divisor
+    if (absNum >= divisor) {
+      const scaled = absNum / divisor
+      let formatted
       if (scaled >= 100) {
-        return Math.round(scaled) + SUFFIXES[i]
+        formatted = Math.round(scaled) + SUFFIXES[i]
       } else if (scaled >= 10) {
-        return scaled.toFixed(1) + SUFFIXES[i]
+        formatted = scaled.toFixed(1) + SUFFIXES[i]
       } else {
-        return scaled.toFixed(2) + SUFFIXES[i]
+        formatted = scaled.toFixed(2) + SUFFIXES[i]
       }
+      return isNegative ? '-' + formatted : formatted
     }
   }
 
@@ -70,28 +84,34 @@ function formatNumberInternal(num) {
 
 /**
  * Formats a bigint using bigint math to avoid precision loss
+ * Handles rounding to match Number path behavior.
  */
 function formatBigInt(value) {
-  if (value < 1000n) {
+  const isNegative = value < 0n
+  const absValue = isNegative ? -value : value
+
+  if (absValue < 1000n) {
     return value.toString()
   }
 
   for (let i = BIGINT_DIVISORS.length - 1; i >= 1; i--) {
-    if (value >= BIGINT_DIVISORS[i]) {
+    if (absValue >= BIGINT_DIVISORS[i]) {
       const divisor = BIGINT_DIVISORS[i]
-      const quotient = value / divisor
-      const remainder = value % divisor
+      const quotient = absValue / divisor
+      const remainder = absValue % divisor
+
+      const scaled = Number(quotient) + Number(remainder) / Number(divisor)
+      let formatted
 
       if (quotient >= 100n) {
-        return quotient.toString() + SUFFIXES[i]
+        formatted = Math.round(scaled) + SUFFIXES[i]
       } else if (quotient >= 10n) {
-        const decimalPart = (remainder * 10n) / divisor
-        return `${quotient}.${decimalPart}` + SUFFIXES[i]
+        formatted = scaled.toFixed(1) + SUFFIXES[i]
       } else {
-        const decimalPart = (remainder * 100n) / divisor
-        const decimalStr = decimalPart.toString().padStart(2, '0')
-        return `${quotient}.${decimalStr}` + SUFFIXES[i]
+        formatted = scaled.toFixed(2) + SUFFIXES[i]
       }
+
+      return isNegative ? '-' + formatted : formatted
     }
   }
 

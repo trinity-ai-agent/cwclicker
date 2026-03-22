@@ -22,13 +22,32 @@ describe('formatNumber', () => {
     expect(formatNumber(1000000000000000000)).toBe('1.00Qi')
   })
 
+  test('rounds values correctly', () => {
+    expect(formatNumber(1995)).toBe('2.00K')
+    expect(formatNumber(1994)).toBe('1.99K')
+    expect(formatNumber(1995000)).toBe('2.00M')
+  })
+
+  test('handles negative values with compact formatting', () => {
+    expect(formatNumber(-500)).toBe('-500')
+    expect(formatNumber(-1500)).toBe('-1.50K')
+    expect(formatNumber(-1995000)).toBe('-2.00M')
+    expect(formatNumber(-1000000000000000n)).toBe('-1.00Qa')
+  })
+
   test('handles BigInt input', () => {
     expect(formatNumber(1000n)).toBe('1.00K')
   })
 
+  test('handles BigInt rounding consistently with Number path', () => {
+    expect(formatNumber(1995n)).toBe('2.00K')
+    expect(formatNumber(1994n)).toBe('1.99K')
+    expect(formatNumber(1995000n)).toBe('2.00M')
+  })
+
   test('handles BigInt above Number.MAX_SAFE_INTEGER without precision loss', () => {
     const hugeNumber = 9007199254740993n
-    expect(formatNumber(hugeNumber)).toBe('9.00Qa')
+    expect(formatNumber(hugeNumber)).toBe('9.01Qa')
   })
 
   test('handles very large BigInt values', () => {
@@ -41,9 +60,21 @@ describe('formatNumber', () => {
     expect(formatNumber('1000')).toBe('1.00K')
   })
 
+  test('handles large integer string without precision loss', () => {
+    expect(formatNumber('9007199254740993')).toBe('9.01Qa')
+    expect(formatNumber('1234567890000000000')).toBe('1.23Qi')
+  })
+
+  test('handles negative string input', () => {
+    expect(formatNumber('-1500')).toBe('-1.50K')
+    expect(formatNumber('-1995')).toBe('-2.00K')
+  })
+
   test('handles edge cases', () => {
     expect(formatNumber(null)).toBe('0')
     expect(formatNumber(undefined)).toBe('0')
-    expect(formatNumber(-500)).toBe('-500')
+    expect(formatNumber('')).toBe('0')
+    expect(formatNumber('   ')).toBe('0')
+    expect(formatNumber('abc')).toBe('0')
   })
 })

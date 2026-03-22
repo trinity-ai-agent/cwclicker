@@ -6,23 +6,15 @@
  * @property {string} name - Display name
  * @property {number} baseCost - Initial cost in QSOs
  * @property {number} qsosPerSecond - Passive generation rate
- * @property {number} tier - License tier (1-7)
+ * @property {number} tier - License tier (1-9)
  * @property {string} description - Satirical description
  */
 
 /**
- * Tier 1-2 (Technician) - 6 factories, 10% scaling
- * @type {Factory[]}
+ * Tier 1 - "Getting On The Air" (Technician start)
+ * Theme: Basic equipment to get started
  */
-const TECHNICIAN_FACTORIES = [
-  {
-    id: 'qrq-protocol',
-    name: 'QRQ Protocol',
-    baseCost: 15,
-    qsosPerSecond: 0.1,
-    tier: 1,
-    description: "QRQ? QRQ? Yes, please! Each unit autoclicks the keyer every 10 seconds."
-  },
+const TIER_1_FACTORIES = [
   {
     id: 'elmer',
     name: 'Elmer',
@@ -32,13 +24,28 @@ const TECHNICIAN_FACTORIES = [
     description: "Old timers who help you get on the air. 'Just listen for a bit, son.'"
   },
   {
+    id: 'qrq-protocol',
+    name: 'QRQ Protocol',
+    baseCost: 15,
+    qsosPerSecond: 0.1,
+    tier: 1,
+    description: "QRQ? QRQ? Yes, please! Each unit autoclicks the keyer every 10 seconds."
+  },
+  {
     id: 'straight-key',
     name: 'Straight Key',
     baseCost: 50,
     qsosPerSecond: 0.3,
     tier: 1,
     description: "Purists who insist 'real hams use straight keys.' Click... click... click..."
-  },
+  }
+];
+
+/**
+ * Tier 2 - "Learning CW" (Technician mid)
+ * Theme: Improving code skills and better equipment
+ */
+const TIER_2_FACTORIES = [
   {
     id: 'paddle-key',
     name: 'Paddle Key',
@@ -66,10 +73,10 @@ const TECHNICIAN_FACTORIES = [
 ];
 
 /**
- * Tier 3-5 (General) - 9 factories, 7% scaling
- * @type {Factory[]}
+ * Tier 3 - "First Contacts" (Technician advanced)
+ * Theme: Making actual contacts, better antennas
  */
-const GENERAL_FACTORIES = [
+const TIER_3_FACTORIES = [
   {
     id: 'vertical-antenna',
     name: 'Vertical Antenna',
@@ -85,13 +92,21 @@ const GENERAL_FACTORIES = [
     qsosPerSecond: 15.0,
     tier: 3,
     description: "When your signal just isn't strong enough to interfere with your neighbor's TV."
-  },
+  }
+  // NOTE: 3rd factory will be added in Phase 3 (Bug Catcher)
+];
+
+/**
+ * Tier 4 - "Upgrading Your Station" (General start)
+ * Theme: Directional antennas and better gear
+ */
+const TIER_4_FACTORIES = [
   {
     id: 'beam-antenna',
     name: 'Beam Antenna',
     baseCost: 25000,
     qsosPerSecond: 30.0,
-    tier: 3,
+    tier: 4,
     description: "Point it that way and talk to the other side of the world. Ignore the wife's complaints."
   },
   {
@@ -101,13 +116,21 @@ const GENERAL_FACTORIES = [
     qsosPerSecond: 60.0,
     tier: 4,
     description: "Because the best antenna is the one that's 200 feet in the air. Good luck with permits!"
-  },
+  }
+  // NOTE: 3rd factory will be added in Phase 3 (Ragchew Net)
+];
+
+/**
+ * Tier 5 - "HF Operations" (General mid)
+ * Theme: Contesting, DX, serious operating
+ */
+const TIER_5_FACTORIES = [
   {
     id: 'contest-station',
     name: 'Contest Station',
     baseCost: 100000,
     qsosPerSecond: 120.0,
-    tier: 4,
+    tier: 5,
     description: "Five radios, six computers, and a complete inability to have normal conversations."
   },
   {
@@ -115,15 +138,23 @@ const GENERAL_FACTORIES = [
     name: 'DX Cluster',
     baseCost: 250000,
     qsosPerSecond: 250.0,
-    tier: 4,
+    tier: 5,
     description: "Real-time spots of rare stations you'll never actually hear yourself."
-  },
+  }
+  // NOTE: 3rd factory will be added in Phase 3 (Paper Logbook)
+];
+
+/**
+ * Tier 6 - "DX & Contesting" (General advanced)
+ * Theme: Serious DXing, hamfests, QSLs
+ */
+const TIER_6_FACTORIES = [
   {
     id: 'hamfest',
     name: 'Hamfest',
     baseCost: 500000,
     qsosPerSecond: 500.0,
-    tier: 5,
+    tier: 6,
     description: "Where hams gather to buy each other's junk. 'I'll give you $5 for that HT that doesn't work.'"
   },
   {
@@ -131,7 +162,7 @@ const GENERAL_FACTORIES = [
     name: 'QSL Card Printer',
     baseCost: 1000000,
     qsosPerSecond: 1000.0,
-    tier: 5,
+    tier: 6,
     description: "Printing cards for contacts you'll never confirm. Bureau backlog: 3 years and counting."
   },
   {
@@ -139,22 +170,22 @@ const GENERAL_FACTORIES = [
     name: 'Remote Station',
     baseCost: 2500000,
     qsosPerSecond: 2500.0,
-    tier: 5,
+    tier: 6,
     description: "Operating a station in the Caribbean from your basement. Totally counts as portable operation."
   }
 ];
 
 /**
- * Tier 6-7 (Extra) - 6 factories, 5% scaling
- * @type {Factory[]}
+ * Tier 7 - "Advanced Modes" (Extra start)
+ * Theme: Digital modes, automation
  */
-const EXTRA_FACTORIES = [
+const TIER_7_FACTORIES = [
   {
     id: 'ft8-bot',
     name: 'FT8 Bot',
     baseCost: 5000000,
     qsosPerSecond: 5000.0,
-    tier: 6,
+    tier: 7,
     description: "'Is it even ham radio if a computer does it?' But it works when propagation is dead!"
   },
   {
@@ -162,15 +193,23 @@ const EXTRA_FACTORIES = [
     name: 'Cluster Spotting Network',
     baseCost: 10000000,
     qsosPerSecond: 10000.0,
-    tier: 6,
+    tier: 7,
     description: "A global network of hams who never actually listen to the bands, just wait for spots."
-  },
+  }
+  // NOTE: 3rd factory will be added in Phase 3 (Digital Interface)
+];
+
+/**
+ * Tier 8 - "Satellite & Space" (Extra mid)
+ * Theme: EME, satellites, moonbounce
+ */
+const TIER_8_FACTORIES = [
   {
     id: 'eme-moonbounce',
     name: 'EME Moonbounce',
     baseCost: 25000000,
     qsosPerSecond: 25000.0,
-    tier: 6,
+    tier: 8,
     description: "Bounce signals off the moon. Requires 1500W and a 40-foot dish. Good for one QSO per hour."
   },
   {
@@ -178,15 +217,23 @@ const EXTRA_FACTORIES = [
     name: 'Satellite Constellation',
     baseCost: 50000000,
     qsosPerSecond: 50000.0,
-    tier: 7,
+    tier: 8,
     description: "Launch your own satellites because the ISS repeater is always busy."
-  },
+  }
+  // NOTE: 3rd factory will be added in Phase 3 (Lunar Repeater)
+];
+
+/**
+ * Tier 9 - "Experimental" (Extra endgame)
+ * Theme: Sci-fi, impossible technology
+ */
+const TIER_9_FACTORIES = [
   {
     id: 'ionospheric-modification',
     name: 'Ionospheric Modification',
     baseCost: 100000000,
     qsosPerSecond: 100000.0,
-    tier: 7,
+    tier: 9,
     description: "HAARP called. They want their conspiracy theories back. 73 from Alaska!"
   },
   {
@@ -194,9 +241,10 @@ const EXTRA_FACTORIES = [
     name: 'Alternate Dimension DXCC',
     baseCost: 500000000,
     qsosPerSecond: 500000.0,
-    tier: 7,
+    tier: 9,
     description: "Work all entities, including those that don't exist in this reality. CQ parallel universe!"
   }
+  // NOTE: 3rd factory will be added in Phase 3 (Time Travel DX)
 ];
 
 /**
@@ -204,9 +252,15 @@ const EXTRA_FACTORIES = [
  * @type {Factory[]}
  */
 export const FACTORIES = [
-  ...TECHNICIAN_FACTORIES,
-  ...GENERAL_FACTORIES,
-  ...EXTRA_FACTORIES
+  ...TIER_1_FACTORIES,
+  ...TIER_2_FACTORIES,
+  ...TIER_3_FACTORIES,
+  ...TIER_4_FACTORIES,
+  ...TIER_5_FACTORIES,
+  ...TIER_6_FACTORIES,
+  ...TIER_7_FACTORIES,
+  ...TIER_8_FACTORIES,
+  ...TIER_9_FACTORIES
 ];
 
 /**

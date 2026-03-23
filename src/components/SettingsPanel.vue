@@ -174,9 +174,26 @@ function isValidSaveData(data) {
 function sanitizeSaveData(data) {
   const sanitized = {}
 
+  // Preserve version for migration detection
+  sanitized.version = String(data.version || '')
+
   // Sanitize qsos - ensure it's a valid numeric string
   const qsosStr = String(data.qsos).replace(/[^\d]/g, '')
   sanitized.qsos = qsosStr || '0'
+
+  // Preserve prestige fields if present
+  if (typeof data.totalQsosEarned === 'string') {
+    const totalStr = data.totalQsosEarned.replace(/[^\d]/g, '')
+    sanitized.totalQsosEarned = totalStr || '0'
+  }
+  if (typeof data.prestigeLevel === 'string') {
+    const levelStr = data.prestigeLevel.replace(/[^\d]/g, '')
+    sanitized.prestigeLevel = levelStr || '0'
+  }
+  if (typeof data.prestigePoints === 'string') {
+    const pointsStr = data.prestigePoints.replace(/[^\d]/g, '')
+    sanitized.prestigePoints = pointsStr || '0'
+  }
 
   // Sanitize licenseLevel
   sanitized.licenseLevel = Math.max(1, Math.min(3, Number(data.licenseLevel) || 1))
@@ -465,8 +482,9 @@ function formatPercent(value) {
 
       <div class="space-y-4">
         <p class="text-gray-400 text-sm">
-          Resetting will permanently delete all your progress including QSOs, factories, upgrades,
-          and achievements. This cannot be undone.
+          Resetting will permanently delete your QSOs, factories, upgrades,
+          and achievements. Prestige progress (level and points) is preserved.
+          This cannot be undone.
         </p>
 
         <div v-if="!showResetConfirm && !showPrestigeResetConfirm">

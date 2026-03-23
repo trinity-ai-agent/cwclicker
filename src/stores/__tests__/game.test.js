@@ -50,7 +50,7 @@ describe('Game Store', () => {
     store.prestigeLevel = 3n
 
     expect(store.canPrestigeReset).toBe(false)
-    expect(store.prestigeMultiplier).toBe(1.15)
+    expect(store.prestigeMultiplier).toBeCloseTo(1.15)
   })
 
   it('prestige reset awards only newly earned points and clears run state', () => {

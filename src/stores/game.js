@@ -280,8 +280,10 @@ export const useGameStore = defineStore('game', () => {
    * @param {bigint} amount - The amount of QSOs to add.
    */
   function addQSOs(amount) {
+    const basisPoints = BigInt(Math.round(prestigeMultiplier.value * 100))
+    const bonus = (amount * basisPoints) / 100n
     qsos.value += amount
-    totalQsosEarned.value += amount
+    totalQsosEarned.value += bonus
   }
 
   const eligiblePrestigeLevel = computed(() => {
@@ -656,6 +658,7 @@ export const useGameStore = defineStore('game', () => {
 
               if (offlineQsos > 0 && Number.isSafeInteger(offlineQsos)) {
                 qsos.value = qsos.value + BigInt(offlineQsos)
+                totalQsosEarned.value += BigInt(offlineQsos)
 
                 // Store offline earnings info for UI display
                 const roundedHours = Math.min(Math.ceil(offlineHours), MAX_OFFLINE_HOURS)

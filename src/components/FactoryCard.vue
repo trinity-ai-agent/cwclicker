@@ -124,7 +124,7 @@ const upgradeProgressSummary = computed(() => {
  */
 const canAffordUpgrade = computed(() => {
   if (!nextUpgrade.value) return false
-  return store.qsos >= BigInt(nextUpgrade.value.baseCost)
+  return store.qsos >= nextUpgrade.value.baseCost
 })
 
 /**
@@ -231,7 +231,7 @@ function handleBuyUpgrade() {
           <div class="mt-1 font-bold text-terminal-green">{{ nextUpgrade.icon }} {{ nextUpgrade.name }}</div>
         </div>
         <div class="text-right">
-          <div class="text-terminal-green">{{ formatNumber(BigInt(nextUpgrade.baseCost)) }}</div>
+          <div class="text-terminal-green">{{ formatNumber(nextUpgrade.baseCost) }}</div>
           <button
             @click="handleBuyUpgrade"
             :disabled="!canAffordUpgrade"

@@ -6,7 +6,7 @@
  * @property {string} factoryId - Which factory this upgrade is for
  * @property {string} name - Display name
  * @property {number} threshold - Number of factories required to unlock
- * @property {number} baseCost - Base cost in QSOs
+ * @property {bigint} baseCost - Base cost in QSOs
  * @property {number} multiplier - Output multiplier (usually 2)
  * @property {string} description - Satirical description
  */
@@ -45,8 +45,8 @@ function generateUpgrades(
   icon = '⚡'
 ) {
   return UPGRADE_THRESHOLDS.slice(0, upgradeNames.length).map((threshold, index) => {
-    // Cost formula: baseCost × 10^(index + 1) - similar to Cookie Clicker scaling
-    const cost = Math.floor(factoryBaseCost * Math.pow(10, index + 1))
+    // Cost formula: baseCost × 10^(index + 1) using bigint math to preserve precision.
+    const cost = BigInt(factoryBaseCost) * 10n ** BigInt(index + 1)
 
     return {
       id: `${factoryId}-upgrade-${index}`,

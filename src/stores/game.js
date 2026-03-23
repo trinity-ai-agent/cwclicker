@@ -380,7 +380,7 @@ export const useGameStore = defineStore('game', () => {
       return false
     }
 
-    const cost = BigInt(upgrade.baseCost)
+    const cost = upgrade.baseCost
 
     if (qsos.value < cost) {
       return false

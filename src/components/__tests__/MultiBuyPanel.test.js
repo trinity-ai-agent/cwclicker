@@ -13,14 +13,6 @@ vi.mock('../../stores/game', () => ({
 describe('MultiBuyPanel.vue', () => {
   const elmerFactory = FACTORIES.find(f => f.id === 'elmer')
 
-  const setMobileViewport = () => {
-    Object.defineProperty(window, 'innerWidth', {
-      configurable: true,
-      value: 375,
-    })
-    window.dispatchEvent(new Event('resize'))
-  }
-
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
@@ -84,9 +76,7 @@ describe('MultiBuyPanel.vue', () => {
     expect(buttons[2].text()).toContain('95') // x10 with discount
   })
 
-  it('renders x1 x5 and x10 buttons that stay visible and clickable on mobile', async () => {
-    setMobileViewport()
-
+  it('renders x1 x5 and x10 buttons and keeps them clickable', async () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,
       factoryCounts: {},

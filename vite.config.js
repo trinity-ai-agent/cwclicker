@@ -1,6 +1,6 @@
 import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
-import { defineConfig } from 'vite'
+import { configDefaults, defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 
 function getGitVersion() {
@@ -59,7 +59,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    exclude: ['.worktrees/**', 'node_modules/**'],
+    exclude: [...configDefaults.exclude, '.worktrees/**'],
   },
   define: {
     __APP_VERSION__: JSON.stringify(getFullVersion()),

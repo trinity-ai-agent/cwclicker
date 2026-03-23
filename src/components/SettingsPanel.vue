@@ -376,16 +376,16 @@ function formatPercent(value) {
         <div class="space-y-2">
           <label class="text-terminal-green text-sm">Export Save Data:</label>
           <div class="flex gap-2">
-          <button
-            @click="exportSave"
-            class="px-4 py-2 bg-terminal-green text-terminal-bg font-bold rounded transition-colors touch-manipulation hover:brightness-110 active:brightness-95"
-          >
+            <button
+              @click="exportSave"
+              class="px-4 py-2 bg-terminal-green text-terminal-bg font-bold rounded transition-colors touch-manipulation hover:brightness-110 active:brightness-95"
+            >
               Generate Save
             </button>
             <button
               v-if="exportData"
               @click="copyToClipboard"
-            class="px-4 py-2 bg-terminal-amber text-terminal-bg font-bold rounded transition-colors touch-manipulation hover:brightness-110 active:brightness-95"
+              class="px-4 py-2 bg-terminal-amber text-terminal-bg font-bold rounded transition-colors touch-manipulation hover:brightness-110 active:brightness-95"
             >
               Copy
             </button>

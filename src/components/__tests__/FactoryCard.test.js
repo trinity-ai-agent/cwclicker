@@ -212,6 +212,32 @@ describe('FactoryCard.vue', () => {
     ).not.toThrow()
   })
 
+  it('displays infinity and NaN rate fallbacks explicitly', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => Number.POSITIVE_INFINITY,
+    })
+
+    const infWrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+    expect(infWrapper.get('[data-testid="factory-production"]').text()).toContain('∞/sec')
+
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => Number.NaN,
+    })
+
+    const nanWrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+    expect(nanWrapper.get('[data-testid="factory-production"]').text()).toContain('—/sec')
+  })
+
   it('disables buy button when cannot afford', () => {
     mockStore({ qsos: 5n })
 

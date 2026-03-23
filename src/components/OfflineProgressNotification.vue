@@ -5,6 +5,19 @@ import { formatNumber } from '../utils/format'
 
 const store = useGameStore()
 
+const formatRate = value => {
+  if (!Number.isFinite(value)) {
+    if (Number.isNaN(value)) {
+      return '—'
+    }
+    if (value === Number.POSITIVE_INFINITY) {
+      return '∞'
+    }
+    return '-∞'
+  }
+  return value.toFixed(1)
+}
+
 /**
  * Dismisses the notification.
  */
@@ -68,7 +81,7 @@ const timeDisplay = computed(() => {
           </div>
 
           <p class="text-xs text-gray-400">
-            (at {{ store.offlineEarnings.rate.toFixed(1) }} QSOs/sec with 50% offline efficiency)
+            (at {{ formatRate(store.offlineEarnings.rate) }} QSOs/sec with 50% offline efficiency)
           </p>
         </div>
 

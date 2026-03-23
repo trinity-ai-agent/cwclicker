@@ -122,6 +122,19 @@ const boostedOutput = computed(() => {
   return baseOutput.value * 7;
 });
 
+const formatRate = value => {
+  if (!Number.isFinite(value)) {
+    if (Number.isNaN(value)) {
+      return '—';
+    }
+    if (value === Number.POSITIVE_INFINITY) {
+      return '∞';
+    }
+    return '-∞';
+  }
+  return value.toFixed(1);
+};
+
 /**
  * Whether a positive bonus is currently active
  * Pure computed - no side effects
@@ -229,7 +242,7 @@ function handleBonusClick() {
               {{ phenomenonTitle }}: {{ boostedFactory.name }} 7x Boost!
             </p>
             <p class="text-sm text-gray-400">
-              Output increased from {{ baseOutput.toFixed(1) }}/sec to {{ boostedOutput.toFixed(1) }}/sec ({{ boostedFactoryCount }} × {{ boostedFactory.qsosPerSecond }}/sec)
+              Output increased from {{ formatRate(baseOutput) }}/sec to {{ formatRate(boostedOutput) }}/sec ({{ boostedFactoryCount }} × {{ boostedFactory.qsosPerSecond }}/sec)
             </p>
           </div>
         </div>

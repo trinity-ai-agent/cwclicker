@@ -63,7 +63,13 @@ const effectivePerFactoryRate = computed(() => {
 
 const formatRate = value => {
   if (!Number.isFinite(value)) {
-    return formatNumber(value)
+    if (Number.isNaN(value)) {
+      return '—'
+    }
+    if (value === Number.POSITIVE_INFINITY) {
+      return '∞'
+    }
+    return '-∞'
   }
   return `${value.toFixed(1)}`
 }

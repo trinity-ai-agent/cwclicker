@@ -190,7 +190,7 @@ describe('FactoryCard.vue', () => {
       },
     })
 
-    const toggle = wrapper.get('button[class*="tracking-wide"]')
+    const toggle = wrapper.get('[data-testid="upgrade-details-toggle"]')
     expect(toggle.attributes('aria-expanded')).toBe('false')
 
     await toggle.trigger('click')

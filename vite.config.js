@@ -22,12 +22,14 @@ function getGitVersion() {
       const baseVersion = readFileSync('./VERSION', 'utf-8').trim()
       const tagName = `v${baseVersion}`
 
-      try {
+      const hasTag = execSync(`git tag --list ${tagName}`, { encoding: 'utf-8' }).trim().length > 0
+
+      if (hasTag) {
         const count = execSync(`git rev-list --count ${tagName}..HEAD`, {
           encoding: 'utf-8',
         }).trim()
         commitsSinceTag = count
-      } catch {
+      } else {
         // Tag doesn't exist yet, count all commits
         commitsSinceTag = execSync('git rev-list --count HEAD', { encoding: 'utf-8' }).trim()
       }
@@ -57,6 +59,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    exclude: ['.worktrees/**', 'node_modules/**'],
   },
   define: {
     __APP_VERSION__: JSON.stringify(getFullVersion()),

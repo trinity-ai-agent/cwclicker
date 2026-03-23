@@ -252,6 +252,7 @@ function handleBuyUpgrade() {
         <span v-if="showUpgradeDetails">Unlocks at {{ nextUpgrade.threshold }} factories.</span>
         <button
           type="button"
+          data-testid="upgrade-details-toggle"
           class="uppercase tracking-wide text-terminal-amber touch-manipulation"
           :aria-expanded="showUpgradeDetails"
           @click="showUpgradeDetails = !showUpgradeDetails"

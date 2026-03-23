@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useGameStore } from './stores/game'
-import { formatNumber } from './utils/format'
+import { formatNumber, formatRate } from './utils/format'
 import { audioService } from './services/audio'
 import StatHeader from './components/StatHeader.vue'
 import LicensePanel from './components/LicensePanel.vue'
@@ -170,82 +170,84 @@ function handleTabKeydown(event, tabId) {
           </nav>
         </div>
 
-        <!-- Tab Content -->
-        <div class="space-y-4">
-          <!-- Store Tab -->
-          <div
-            v-if="activeTab === 'store'"
-            id="panel-store"
-            role="tabpanel"
-            aria-labelledby="tab-store"
-            class="space-y-4"
-          >
-            <div class="flex justify-between items-center px-2">
-              <div>
-                <h2 class="text-xl font-bold text-terminal-green">Factory Store</h2>
+        <!-- Tab Content with KeepAlive -->
+        <KeepAlive>
+          <div class="space-y-4">
+            <!-- Store Tab -->
+            <div
+              v-if="activeTab === 'store'"
+              id="panel-store"
+              role="tabpanel"
+              aria-labelledby="tab-store"
+              class="space-y-4"
+            >
+              <div class="flex justify-between items-center px-2">
+                <div>
+                  <h2 class="text-xl font-bold text-terminal-green">Factory Store</h2>
                 <p class="text-sm text-terminal-amber mt-1">
-                  Producing: {{ store.getTotalQSOsPerSecond().toFixed(1) }} QSOs/sec
+                  Producing: {{ formatRate(store.getTotalQSOsPerSecond()) }} QSOs/sec
+                </p>
+                </div>
+                <span class="text-terminal-green text-lg">{{ formatNumber(store.qsos) }} QSOs</span>
+              </div>
+
+              <div class="space-y-4">
+                <FactoryCard
+                  v-for="factory in availableFactories"
+                  :key="factory.id"
+                  :factory="factory"
+                  @buy="handleFactoryBuy"
+                />
+              </div>
+            </div>
+
+            <!-- Bulk Buy Tab -->
+            <div
+              v-if="activeTab === 'bulk'"
+              id="panel-bulk"
+              role="tabpanel"
+              aria-labelledby="tab-bulk"
+              class="space-y-4"
+            >
+              <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl font-bold text-terminal-green">Bulk Purchase</h2>
+                <span class="text-terminal-green">Unlocks at 10 total factories</span>
+              </div>
+
+              <div v-if="multiBuyAvailable" class="space-y-4">
+                <MultiBuyPanel
+                  v-for="factory in availableFactories"
+                  :key="factory.id"
+                  :factory="factory"
+                  :multi-buy-available="multiBuyAvailable"
+                  @buy="handleFactoryBuy"
+                />
+              </div>
+              <div
+                v-else
+                class="border-2 border-terminal-green bg-terminal-bg p-4 rounded text-center"
+              >
+                <p class="text-gray-400">Bulk purchasing locked</p>
+                <p class="text-sm text-gray-500 mt-2">
+                  Own {{ 10 - totalFactoryCount }} more factories to unlock bulk buying
+                </p>
+                <p class="text-xs text-terminal-amber mt-1">
+                  Current: {{ totalFactoryCount }}/10 factories
                 </p>
               </div>
-              <span class="text-terminal-green text-lg">{{ formatNumber(store.qsos) }} QSOs</span>
             </div>
 
-            <div class="space-y-4">
-              <FactoryCard
-                v-for="factory in availableFactories"
-                :key="factory.id"
-                :factory="factory"
-                @buy="handleFactoryBuy"
-              />
-            </div>
-          </div>
-
-          <!-- Bulk Buy Tab -->
-          <div
-            v-if="activeTab === 'bulk'"
-            id="panel-bulk"
-            role="tabpanel"
-            aria-labelledby="tab-bulk"
-            class="space-y-4"
-          >
-            <div class="flex justify-between items-center px-2">
-              <h2 class="text-xl font-bold text-terminal-green">Bulk Purchase</h2>
-              <span class="text-terminal-green">Unlocks at 10 total factories</span>
-            </div>
-
-            <div v-if="multiBuyAvailable" class="space-y-4">
-              <MultiBuyPanel
-                v-for="factory in availableFactories"
-                :key="factory.id"
-                :factory="factory"
-                :multi-buy-available="multiBuyAvailable"
-                @buy="handleFactoryBuy"
-              />
-            </div>
+            <!-- Settings Tab -->
             <div
-              v-else
-              class="border-2 border-terminal-green bg-terminal-bg p-4 rounded text-center"
+              v-if="activeTab === 'settings'"
+              id="panel-settings"
+              role="tabpanel"
+              aria-labelledby="tab-settings"
             >
-              <p class="text-gray-400">Bulk purchasing locked</p>
-              <p class="text-sm text-gray-500 mt-2">
-                Own {{ 10 - totalFactoryCount }} more factories to unlock bulk buying
-              </p>
-              <p class="text-xs text-terminal-amber mt-1">
-                Current: {{ totalFactoryCount }}/10 factories
-              </p>
+              <SettingsPanel />
             </div>
           </div>
-
-          <!-- Settings Tab -->
-          <div
-            v-if="activeTab === 'settings'"
-            id="panel-settings"
-            role="tabpanel"
-            aria-labelledby="tab-settings"
-          >
-            <SettingsPanel />
-          </div>
-        </div>
+        </KeepAlive>
       </main>
 
       <footer

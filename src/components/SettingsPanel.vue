@@ -469,15 +469,15 @@ function formatPercent(value) {
           and achievements. This cannot be undone.
         </p>
 
-        <div v-if="!showResetConfirm">
+        <div v-if="!showResetConfirm && !showPrestigeResetConfirm">
           <button
-            @click="showResetConfirm = true"
+            @click="showResetConfirm = true; showPrestigeResetConfirm = false"
             class="px-6 py-3 bg-red-600 text-white font-bold rounded hover:bg-red-700 transition-colors"
           >
             ⚠️ Reset Game
           </button>
           <button
-            @click="showPrestigeResetConfirm = true"
+            @click="showPrestigeResetConfirm = true; showResetConfirm = false"
             :disabled="!store.canPrestigeReset"
             class="ml-3 px-6 py-3 bg-terminal-amber text-terminal-bg font-bold rounded hover:brightness-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -485,7 +485,7 @@ function formatPercent(value) {
           </button>
         </div>
 
-        <div v-else class="space-y-4 border-2 border-red-600 p-4 rounded">
+        <div v-else-if="showResetConfirm" class="space-y-4 border-2 border-red-600 p-4 rounded">
           <p class="text-red-500 font-bold">Are you sure? This cannot be undone!</p>
 
           <div class="flex gap-4">
@@ -505,7 +505,7 @@ function formatPercent(value) {
           </div>
         </div>
 
-        <div v-if="showPrestigeResetConfirm" class="space-y-4 border-2 border-terminal-amber p-4 rounded">
+        <div v-else-if="showPrestigeResetConfirm" class="space-y-4 border-2 border-terminal-amber p-4 rounded">
           <p class="text-terminal-amber font-bold">Prestige reset will reset your run but keep prestige progress.</p>
 
           <div class="flex gap-4">

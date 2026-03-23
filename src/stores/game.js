@@ -675,14 +675,14 @@ export const useGameStore = defineStore('game', () => {
     let total = 0
 
     for (const [factoryId, count] of Object.entries(factoryCounts.value)) {
-        const factory = FACTORIES.find(f => f.id === factoryId)
-        if (factory) {
-          const lotteryMultiplier = getLotteryMultiplier(factoryId)
-          const upgradeMultiplier = getUpgradeMultiplier(factoryId)
-          total +=
-            factory.qsosPerSecond * count * lotteryMultiplier * upgradeMultiplier * prestigeMultiplier.value
-        }
+      const factory = FACTORIES.find(f => f.id === factoryId)
+      if (factory) {
+        const lotteryMultiplier = getLotteryMultiplier(factoryId)
+        const upgradeMultiplier = getUpgradeMultiplier(factoryId)
+        total +=
+          factory.qsosPerSecond * count * lotteryMultiplier * upgradeMultiplier * prestigeMultiplier.value
       }
+    }
 
     return total
   }

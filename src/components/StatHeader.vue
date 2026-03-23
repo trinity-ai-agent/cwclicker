@@ -10,19 +10,43 @@ const store = useGameStore()
 
 const prestigeBonusPercent = computed(() => `+${Math.round((Number(store.prestigeMultiplier) - 1) * 100)}%`)
 
+const currentPrestigeThreshold = computed(() => {
+  const level = store.prestigeLevel
+  if (level <= 0n) {
+    return 0n
+  }
+  return 1_000_000_000n * level * level * level
+})
+
 const nextPrestigeThreshold = computed(() => {
-  const nextLevel = store.prestigeLevel + 1n
+  const effectiveLevel = store.prestigeLevel > store.eligiblePrestigeLevel
+    ? store.prestigeLevel
+    : store.eligiblePrestigeLevel
+  const nextLevel = effectiveLevel + 1n
   return 1_000_000_000n * nextLevel * nextLevel * nextLevel
 })
 
 const prestigeProgress = computed(() => {
-  const current = Number(store.totalQsosEarned)
-  const next = Number(nextPrestigeThreshold.value)
-  if (!next || !Number.isFinite(current)) {
+  const current = store.totalQsosEarned
+  const currentThreshold = currentPrestigeThreshold.value
+  const nextThreshold = nextPrestigeThreshold.value
+
+  if (
+    typeof current !== 'bigint' ||
+    nextThreshold <= currentThreshold ||
+    nextThreshold === 0n
+  ) {
     return 0
   }
 
-  return Math.min(1, Math.max(0, current / next))
+  if (current >= nextThreshold) {
+    return 1
+  }
+
+  const SCALE = 10_000n
+  const progress = (current * SCALE) / nextThreshold
+
+  return Number(progress) / Number(SCALE)
 })
 </script>
 

@@ -133,7 +133,7 @@ describe('FactoryCard.vue', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Latest Purchased')
+    expect(wrapper.text()).toContain('Purchased Upgrades')
     expect(wrapper.text()).not.toContain('Rusty Soldering Iron')
     expect(wrapper.text()).not.toContain('Coffee-Stained Logbook')
 

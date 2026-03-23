@@ -273,7 +273,7 @@ function handleBuyUpgrade() {
           class="flex w-full items-center justify-between text-left"
         >
           <div>
-            <span class="text-xs text-gray-400 uppercase">Latest Purchased</span>
+            <span class="text-xs text-gray-400 uppercase">Purchased Upgrades</span>
             <span class="text-xs text-gray-500 ml-2">({{ purchasedCount }})</span>
           </div>
           <span class="text-gray-500">{{ showPurchasedUpgrades ? '▲' : '▼' }}</span>

@@ -77,7 +77,7 @@ function resetPrestige() {
   store.prestigeReset()
 
   // Hide confirmation
-  showResetConfirm.value = false
+  showPrestigeResetConfirm.value = false
 
   // Reload page to ensure clean state
   window.location.reload()

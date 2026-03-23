@@ -80,5 +80,6 @@ describe('SettingsPanel.vue', () => {
     await confirmButtons[0].trigger('click')
 
     expect(prestigeReset).toHaveBeenCalled()
+    expect(wrapper.text()).not.toContain('Prestige reset will reset your run but keep prestige progress.')
   })
 })

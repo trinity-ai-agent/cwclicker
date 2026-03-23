@@ -108,7 +108,7 @@ defineExpose({
     <!-- Collapsed Header -->
     <button
       @click="togglePanel"
-      class="w-full px-4 py-2 flex items-center justify-between text-terminal-green transition-colors touch-action-manipulation hover:bg-terminal-green hover:text-terminal-bg active:brightness-95"
+      class="w-full px-4 py-2 flex items-center justify-between text-terminal-green transition-colors touch-manipulation hover:bg-terminal-green hover:text-terminal-bg active:brightness-95"
       :class="{ 'border-b-2 border-terminal-green': isExpanded }"
     >
       <span class="font-bold flex items-center gap-2">

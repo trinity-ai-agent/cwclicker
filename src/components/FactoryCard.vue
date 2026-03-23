@@ -231,7 +231,7 @@ function handleBuyUpgrade() {
           <div class="mt-1 font-bold text-terminal-green">{{ nextUpgrade.icon }} {{ nextUpgrade.name }}</div>
         </div>
         <div class="text-right">
-          <div class="text-terminal-green">{{ formatNumber(nextUpgrade.baseCost) }}</div>
+          <div class="text-terminal-green">{{ formatNumber(BigInt(nextUpgrade.baseCost)) }}</div>
           <button
             @click="handleBuyUpgrade"
             :disabled="!canAffordUpgrade"

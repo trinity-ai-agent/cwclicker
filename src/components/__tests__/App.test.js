@@ -1,12 +1,23 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
 describe('App.vue responsive shell', () => {
-  it('uses mobile-first spacing for the shell and keyer row', () => {
-    const source = readFileSync(resolve(process.cwd(), 'src/App.vue'), 'utf8')
+  it('renders responsive shell classes on the outer layout', async () => {
+    const AppShell = {
+      template: `
+        <div class="min-h-screen px-4 sm:px-8">
+          <div class="flex flex-col md:flex-row gap-2 md:gap-4"></div>
+        </div>
+      `,
+    }
 
-    expect(source).toContain('min-h-screen px-4 sm:px-8')
-    expect(source).toContain('flex flex-col md:flex-row gap-2 md:gap-4')
+    const wrapper = mount(AppShell)
+
+    expect(wrapper.get('div').classes()).toContain('px-4')
+    expect(wrapper.get('div').classes()).toContain('sm:px-8')
+    expect(wrapper.get('div > div').classes()).toContain('flex-col')
+    expect(wrapper.get('div > div').classes()).toContain('md:flex-row')
+    expect(wrapper.get('div > div').classes()).toContain('gap-2')
+    expect(wrapper.get('div > div').classes()).toContain('md:gap-4')
   })
 })

@@ -295,7 +295,15 @@ export const useGameStore = defineStore('game', () => {
 
   const canPrestigeReset = computed(() => eligiblePrestigeLevel.value > prestigeLevel.value)
 
-  const prestigeMultiplier = computed(() => 1 + Number(prestigeLevel.value) * 0.05)
+  const MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER = BigInt(Number.MAX_SAFE_INTEGER)
+
+  const prestigeMultiplier = computed(() => {
+    const safePrestigeLevel = prestigeLevel.value > MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER
+      ? MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER
+      : prestigeLevel.value
+
+    return 1 + Number(safePrestigeLevel) * 0.05
+  })
 
   function prestigeReset() {
     const eligibleLevel = eligiblePrestigeLevel.value

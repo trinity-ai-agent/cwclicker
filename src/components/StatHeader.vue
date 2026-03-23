@@ -39,12 +39,18 @@ const prestigeProgress = computed(() => {
     return 0
   }
 
+  if (current <= currentThreshold) {
+    return 0
+  }
+
   if (current >= nextThreshold) {
     return 1
   }
 
   const SCALE = 10_000n
-  const progress = (current * SCALE) / nextThreshold
+  const relative = current - currentThreshold
+  const range = nextThreshold - currentThreshold
+  const progress = (relative * SCALE) / range
 
   return Number(progress) / Number(SCALE)
 })

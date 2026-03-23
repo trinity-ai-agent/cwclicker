@@ -214,7 +214,7 @@ describe('Game Store - Factory Logic', () => {
         threshold: 1,
       })
       expect(upgrades[0].name).toBeDefined()
-      expect(upgrades[0].baseCost).toBeGreaterThan(0)
+      expect(upgrades[0].baseCost).toBeGreaterThan(0n)
     })
   })
 })

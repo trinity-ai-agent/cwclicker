@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useGameStore } from '../stores/game';
 import { FACTORIES } from '../constants/factories';
+import { formatRate } from '../utils/format';
 
 /**
  * Emits events from the component.
@@ -209,7 +210,7 @@ function handleBonusClick() {
 
         <button
           @click="handleBonusClick"
-          class="ml-4 px-6 py-3 bg-terminal-amber text-terminal-bg font-bold rounded hover:bg-yellow-500 transition-colors animate-bounce"
+          class="ml-4 px-6 py-3 bg-terminal-amber text-terminal-bg font-bold rounded transition-colors touch-manipulation hover:brightness-110 active:brightness-95 animate-bounce"
         >
           WORK IT!
         </button>
@@ -229,7 +230,7 @@ function handleBonusClick() {
               {{ phenomenonTitle }}: {{ boostedFactory.name }} 7x Boost!
             </p>
             <p class="text-sm text-gray-400">
-              Output increased from {{ baseOutput.toFixed(1) }}/sec to {{ boostedOutput.toFixed(1) }}/sec ({{ boostedFactoryCount }} × {{ boostedFactory.qsosPerSecond }}/sec)
+              Output increased from {{ formatRate(baseOutput) }}/sec to {{ formatRate(boostedOutput) }}/sec ({{ boostedFactoryCount }} × {{ boostedFactory.qsosPerSecond }}/sec)
             </p>
           </div>
         </div>

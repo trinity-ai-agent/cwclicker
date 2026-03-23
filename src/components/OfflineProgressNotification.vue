@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useGameStore } from '../stores/game'
-import { formatNumber } from '../utils/format'
+import { formatNumber, formatRate } from '../utils/format'
 
 const store = useGameStore()
 
@@ -68,7 +68,7 @@ const timeDisplay = computed(() => {
           </div>
 
           <p class="text-xs text-gray-400">
-            (at {{ store.offlineEarnings.rate.toFixed(1) }} QSOs/sec with 50% offline efficiency)
+            (at {{ formatRate(store.offlineEarnings.rate) }} QSOs/sec with 50% offline efficiency)
           </p>
         </div>
 

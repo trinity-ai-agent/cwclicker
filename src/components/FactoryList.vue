@@ -31,15 +31,15 @@ const handleBuy = (event) => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-5 px-2 sm:px-4 lg:px-0">
     <!-- Header with title and QSOs/sec -->
-    <div class="flex justify-between items-center px-2">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <h2 class="text-2xl font-bold text-terminal-green">Factories</h2>
       <span class="text-terminal-green">QSOs/sec: {{ totalQSOsPerSecond }}</span>
     </div>
 
     <!-- Factory cards or empty state -->
-    <div v-if="availableFactories.length > 0" class="space-y-4">
+    <div v-if="availableFactories.length > 0" class="space-y-4 sm:space-y-5">
       <FactoryCard
         v-for="factory in availableFactories"
         :key="factory.id"
@@ -53,7 +53,7 @@ const handleBuy = (event) => {
     </div>
 
     <!-- MultiBuyPanel for each factory (shown when 10+ factories owned) -->
-    <div v-if="multiBuyAvailable && availableFactories.length > 0" class="space-y-2 mt-4">
+    <div v-if="multiBuyAvailable && availableFactories.length > 0" class="space-y-3 mt-4 sm:space-y-4">
       <MultiBuyPanel
         v-for="factory in availableFactories"
         :key="`multibuy-${factory.id}`"

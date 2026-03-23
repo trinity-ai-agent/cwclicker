@@ -1,22 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useGameStore } from '../stores/game'
-import { formatNumber } from '../utils/format'
+import { formatNumber, formatRate } from '../utils/format'
 
 const store = useGameStore()
-
-const formatRate = value => {
-  if (!Number.isFinite(value)) {
-    if (Number.isNaN(value)) {
-      return '—'
-    }
-    if (value === Number.POSITIVE_INFINITY) {
-      return '∞'
-    }
-    return '-∞'
-  }
-  return value.toFixed(1)
-}
 
 /**
  * Dismisses the notification.

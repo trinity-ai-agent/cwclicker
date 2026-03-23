@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useGameStore } from '../stores/game'
 import { UPGRADES } from '../constants/upgrades'
-import { formatNumber } from '../utils/format'
+import { formatNumber, formatRate } from '../utils/format'
 
 /**
  * Props for the FactoryCard component.
@@ -60,19 +60,6 @@ const effectivePerFactoryRate = computed(() => {
   const upgradeMultiplier = store.getUpgradeMultiplier(props.factory.id)
   return props.factory.qsosPerSecond * upgradeMultiplier
 })
-
-const formatRate = value => {
-  if (!Number.isFinite(value)) {
-    if (Number.isNaN(value)) {
-      return '—'
-    }
-    if (value === Number.POSITIVE_INFINITY) {
-      return '∞'
-    }
-    return '-∞'
-  }
-  return `${value.toFixed(1)}`
-}
 
 /**
  * Calculates how many more QSOs are needed to afford this factory.

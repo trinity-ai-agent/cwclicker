@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useGameStore } from '../stores/game';
 import { FACTORIES } from '../constants/factories';
+import { formatRate } from '../utils/format';
 
 /**
  * Emits events from the component.
@@ -121,19 +122,6 @@ const baseOutput = computed(() => {
 const boostedOutput = computed(() => {
   return baseOutput.value * 7;
 });
-
-const formatRate = value => {
-  if (!Number.isFinite(value)) {
-    if (Number.isNaN(value)) {
-      return '—';
-    }
-    if (value === Number.POSITIVE_INFINITY) {
-      return '∞';
-    }
-    return '-∞';
-  }
-  return value.toFixed(1);
-};
 
 /**
  * Whether a positive bonus is currently active

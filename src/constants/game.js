@@ -109,5 +109,5 @@ export function getUpgradeThreshold(index) {
  * Calculate upgrade cost for a factory
  */
 export function calculateUpgradeCost(factoryBaseCost, tier) {
-  return Math.floor(factoryBaseCost * Math.pow(GAME_CONSTANTS.UPGRADES.COST_MULTIPLIER_BASE, tier + 1))
+  return BigInt(factoryBaseCost) * BigInt(GAME_CONSTANTS.UPGRADES.COST_MULTIPLIER_BASE) ** BigInt(tier + 1)
 }

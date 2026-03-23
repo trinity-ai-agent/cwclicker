@@ -76,6 +76,62 @@ describe('MultiBuyPanel.vue', () => {
     expect(buttons[2].text()).toContain('95') // x10 with discount
   })
 
+  it('renders x1 x5 and x10 buttons and keeps them clickable', async () => {
+    useGameStore.mockReturnValue({
+      qsos: 1000n,
+      factoryCounts: {},
+      getFactoryCost: () => 10n,
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95)),
+    })
+
+    const wrapper = mount(MultiBuyPanel, {
+      props: {
+        multiBuyAvailable: true,
+        factory: elmerFactory,
+      },
+    })
+
+    const buttons = wrapper.findAll('button')
+    expect(buttons.map(button => button.text().trim().split(':')[0])).toEqual([
+      '×1',
+      '×5',
+      '×10',
+    ])
+
+    for (const button of buttons) {
+      expect(button.isVisible()).toBe(true)
+      expect(button.attributes('disabled')).toBeUndefined()
+      await button.trigger('click')
+    }
+
+    expect(wrapper.emitted('buy')).toEqual([
+      [{ factory: elmerFactory, count: 1 }],
+      [{ factory: elmerFactory, count: 5 }],
+      [{ factory: elmerFactory, count: 10 }],
+    ])
+  })
+
+  it('applies the responsive grid classes for the button row', () => {
+    useGameStore.mockReturnValue({
+      qsos: 1000n,
+      factoryCounts: {},
+      getFactoryCost: () => 10n,
+      getBulkCost: (id, count) => BigInt(Math.floor(count * 10 * 0.95)),
+    })
+
+    const wrapper = mount(MultiBuyPanel, {
+      props: {
+        multiBuyAvailable: true,
+        factory: elmerFactory,
+      },
+    })
+
+    const row = wrapper.get('[data-testid="bulk-buy-row"]')
+    expect(row.classes()).toContain('grid')
+    expect(row.classes()).toContain('grid-cols-1')
+    expect(row.classes()).toContain('sm:grid-cols-3')
+  })
+
   it('emits buy event with count 1 on x1 button click', async () => {
     useGameStore.mockReturnValue({
       qsos: 1000n,

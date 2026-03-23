@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import FactoryCard from '../FactoryCard.vue'
 import { useGameStore } from '../../stores/game'
 import { FACTORIES } from '../../constants/factories'
+import { UPGRADES } from '../../constants/upgrades'
 
 // Mock the game store to control the state
 vi.mock('../../stores/game', () => ({
@@ -12,6 +13,21 @@ vi.mock('../../stores/game', () => ({
 
 describe('FactoryCard.vue', () => {
   const elmerFactory = FACTORIES.find(f => f.id === 'elmer')
+  const elmerUpgrade = UPGRADES.find(u => u.factoryId === 'elmer')
+
+  function mockStore(overrides = {}) {
+    useGameStore.mockReturnValue({
+      qsos: 100n,
+      factoryCounts: {},
+      getFactoryCost: () => 10n,
+      getUpgradeMultiplier: () => 1,
+      getAvailableUpgrades: () => [],
+      purchasedUpgrades: new Set(),
+      buyUpgrade: () => {},
+      save: () => {},
+      ...overrides,
+    })
+  }
 
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -19,16 +35,7 @@ describe('FactoryCard.vue', () => {
   })
 
   it('renders factory name', () => {
-    useGameStore.mockReturnValue({
-      qsos: 100,
-      factoryCounts: {},
-      getFactoryCost: () => 10,
-      getUpgradeMultiplier: () => 1,
-      getAvailableUpgrades: () => [],
-      purchasedUpgrades: new Set(),
-      buyUpgrade: () => {},
-      save: () => {},
-    })
+    mockStore()
 
     const wrapper = mount(FactoryCard, {
       props: {
@@ -40,16 +47,7 @@ describe('FactoryCard.vue', () => {
   })
 
   it('shows QSOs per second', () => {
-    useGameStore.mockReturnValue({
-      qsos: 100,
-      factoryCounts: {},
-      getFactoryCost: () => 10,
-      getUpgradeMultiplier: () => 1,
-      getAvailableUpgrades: () => [],
-      purchasedUpgrades: new Set(),
-      buyUpgrade: () => {},
-      save: () => {},
-    })
+    mockStore()
 
     const wrapper = mount(FactoryCard, {
       props: {
@@ -61,16 +59,7 @@ describe('FactoryCard.vue', () => {
   })
 
   it('shows current cost', () => {
-    useGameStore.mockReturnValue({
-      qsos: 100,
-      factoryCounts: {},
-      getFactoryCost: () => 15,
-      getUpgradeMultiplier: () => 1,
-      getAvailableUpgrades: () => [],
-      purchasedUpgrades: new Set(),
-      buyUpgrade: () => {},
-      save: () => {},
-    })
+    mockStore({ getFactoryCost: () => 15n })
 
     const wrapper = mount(FactoryCard, {
       props: {
@@ -81,17 +70,176 @@ describe('FactoryCard.vue', () => {
     expect(wrapper.text()).toContain('15')
   })
 
-  it('disables buy button when cannot afford', () => {
-    useGameStore.mockReturnValue({
-      qsos: 5,
-      factoryCounts: {},
-      getFactoryCost: () => 10,
-      getUpgradeMultiplier: () => 1,
-      getAvailableUpgrades: () => [],
-      purchasedUpgrades: new Set(),
-      buyUpgrade: () => {},
-      save: () => {},
+  it('keeps cost and buy together in one action row', () => {
+    mockStore({ getFactoryCost: () => 15n })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
     })
+
+    const actionRow = wrapper.find('[data-testid="factory-action-row"]')
+    expect(actionRow.exists()).toBe(true)
+    expect(actionRow.text()).toContain('15')
+    expect(actionRow.text()).toContain('Buy')
+  })
+
+  it('shows final rate above the breakdown line', () => {
+    mockStore({
+      factoryCounts: { elmer: 50 },
+      getFactoryCost: () => 15n,
+      getUpgradeMultiplier: () => 2,
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    const output = wrapper.find('[data-testid="factory-production"]')
+    expect(output.text()).toContain('10.0/sec')
+    expect(output.text()).toContain('(0.2/sec × 50)')
+    expect(output.text().indexOf('10.0/sec')).toBeLessThan(output.text().indexOf('(0.2/sec × 50)'))
+  })
+
+  it('sources the upgrade teaser text from upgrade description', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getAvailableUpgrades: () => [elmerUpgrade],
+      getUpgradeMultiplier: () => 1,
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    expect(wrapper.text()).toContain(elmerUpgrade.description)
+  })
+
+  it('starts purchased upgrades collapsed by default', async () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getAvailableUpgrades: () => [],
+      purchasedUpgrades: new Set(['elmer-upgrade-0', 'elmer-upgrade-1']),
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    expect(wrapper.text()).toContain('Purchased Upgrades')
+    expect(wrapper.text()).not.toContain('Rusty Soldering Iron')
+    expect(wrapper.text()).not.toContain('Coffee-Stained Logbook')
+
+    await wrapper.get('[data-testid="purchased-upgrades-toggle"]').trigger('click')
+    expect(wrapper.text()).toContain('Rusty Soldering Iron')
+    expect(wrapper.text()).toContain('Coffee-Stained Logbook')
+  })
+
+  it('hides the upgrade badge row below 640px', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => 2,
+      getAvailableUpgrades: () => [elmerUpgrade],
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    expect(wrapper.get('[data-testid="upgrade-badge-row"]').classes()).toContain('hidden')
+    expect(wrapper.get('[data-testid="upgrade-badge-row"]').classes()).toContain('sm:block')
+  })
+
+  it('shows a compact upgrade summary on mobile', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => 4,
+      getAvailableUpgrades: () => [elmerUpgrade],
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    const summary = wrapper.get('[data-testid="upgrade-summary-mobile"]')
+    expect(summary.classes()).toContain('sm:hidden')
+    expect(summary.text()).toContain('4x active')
+    expect(summary.text()).toContain('7 more')
+  })
+
+  it('exposes aria-expanded on upgrade details toggle', async () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getAvailableUpgrades: () => [elmerUpgrade],
+    })
+
+    const wrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+
+    const toggle = wrapper.get('[data-testid="upgrade-details-toggle"]')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+  })
+
+  it('handles non-finite rates without throwing', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => Number.POSITIVE_INFINITY,
+    })
+
+    expect(() =>
+      mount(FactoryCard, {
+        props: {
+          factory: elmerFactory,
+        },
+      })
+    ).not.toThrow()
+  })
+
+  it('displays infinity and NaN rate fallbacks explicitly', () => {
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => Number.POSITIVE_INFINITY,
+    })
+
+    const infWrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+    expect(infWrapper.get('[data-testid="factory-production"]').text()).toContain('∞/sec')
+
+    mockStore({
+      factoryCounts: { elmer: 1 },
+      getUpgradeMultiplier: () => Number.NaN,
+    })
+
+    const nanWrapper = mount(FactoryCard, {
+      props: {
+        factory: elmerFactory,
+      },
+    })
+    expect(nanWrapper.get('[data-testid="factory-production"]').text()).toContain('—/sec')
+  })
+
+  it('disables buy button when cannot afford', () => {
+    mockStore({ qsos: 5n })
 
     const wrapper = mount(FactoryCard, {
       props: {
@@ -104,16 +252,7 @@ describe('FactoryCard.vue', () => {
   })
 
   it('emits buy event on click when affordable', async () => {
-    useGameStore.mockReturnValue({
-      qsos: 100,
-      factoryCounts: {},
-      getFactoryCost: () => 10,
-      getUpgradeMultiplier: () => 1,
-      getAvailableUpgrades: () => [],
-      purchasedUpgrades: new Set(),
-      buyUpgrade: () => {},
-      save: () => {},
-    })
+    mockStore()
 
     const wrapper = mount(FactoryCard, {
       props: {

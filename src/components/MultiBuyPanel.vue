@@ -52,18 +52,18 @@ const formatCost = cost => {
 <template>
   <div
     v-if="multiBuyAvailable && factory"
-    class="border-2 border-terminal-green bg-terminal-bg p-3 rounded"
+    class="border-2 border-terminal-green bg-terminal-bg p-3 sm:p-4 rounded"
   >
-    <div class="text-sm text-gray-400 mb-2">
+    <div class="text-sm text-gray-400 mb-3 leading-snug">
       Bulk Purchase: <span class="text-terminal-green font-semibold">{{ factory.name }}</span>
     </div>
-    <div class="flex gap-2">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3" data-testid="bulk-buy-row">
       <button
         @click="handleBuy(1)"
         :disabled="!canAfford1"
-        class="flex-1 px-2 py-1 rounded text-sm font-bold transition-colors"
+        class="w-full px-3 py-2 rounded text-sm font-bold transition-colors touch-manipulation"
         :class="{
-          'bg-terminal-green text-terminal-bg hover:bg-green-600': canAfford1,
+          'bg-terminal-green text-terminal-bg hover:brightness-110 active:brightness-95': canAfford1,
           'bg-gray-700 text-gray-400 opacity-50 cursor-not-allowed': !canAfford1,
         }"
       >
@@ -72,9 +72,9 @@ const formatCost = cost => {
       <button
         @click="handleBuy(5)"
         :disabled="!canAfford5"
-        class="flex-1 px-2 py-1 rounded text-sm font-bold transition-colors"
+        class="w-full px-3 py-2 rounded text-sm font-bold transition-colors touch-manipulation"
         :class="{
-          'bg-terminal-green text-terminal-bg hover:bg-green-600': canAfford5,
+          'bg-terminal-green text-terminal-bg hover:brightness-110 active:brightness-95': canAfford5,
           'bg-gray-700 text-gray-400 opacity-50 cursor-not-allowed': !canAfford5,
         }"
       >
@@ -83,9 +83,9 @@ const formatCost = cost => {
       <button
         @click="handleBuy(10)"
         :disabled="!canAfford10"
-        class="flex-1 px-2 py-1 rounded text-sm font-bold transition-colors"
+        class="w-full px-3 py-2 rounded text-sm font-bold transition-colors touch-manipulation"
         :class="{
-          'bg-terminal-green text-terminal-bg hover:bg-green-600': canAfford10,
+          'bg-terminal-green text-terminal-bg hover:brightness-110 active:brightness-95': canAfford10,
           'bg-gray-700 text-gray-400 opacity-50 cursor-not-allowed': !canAfford10,
         }"
       >

@@ -53,6 +53,21 @@ describe('Game Store', () => {
     expect(store.prestigeMultiplier).toBeCloseTo(1.15)
   })
 
+  it('applies prestige multiplier to keyer taps', () => {
+    const store = useGameStore()
+
+    store.totalQsosEarned = 27_000_000_000n
+    store.prestigeLevel = 3n
+
+    store.tapKeyer('dit')
+    expect(store.qsos).toBe(1n)
+    expect(store.totalQsosEarned).toBe(27_000_000_001n)
+
+    store.tapKeyer('dah')
+    expect(store.qsos).toBe(3n)
+    expect(store.totalQsosEarned).toBe(27_000_000_003n)
+  })
+
   it('prestige reset awards only newly earned points and clears run state', () => {
     const store = useGameStore()
 

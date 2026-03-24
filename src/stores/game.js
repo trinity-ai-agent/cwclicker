@@ -280,7 +280,10 @@ export const useGameStore = defineStore('game', () => {
    * @param {bigint} amount - The amount of QSOs to add.
    */
   function addQSOs(amount) {
-    const basisPoints = BigInt(Math.round(prestigeMultiplier.value * 100))
+    const clampedPrestigeLevel = prestigeLevel.value > MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER
+      ? MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER
+      : prestigeLevel.value
+    const basisPoints = 100n + 5n * clampedPrestigeLevel
     const bonus = (amount * basisPoints) / 100n
     qsos.value += bonus
     totalQsosEarned.value += bonus

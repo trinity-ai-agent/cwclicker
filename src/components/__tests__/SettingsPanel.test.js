@@ -32,6 +32,7 @@ describe('SettingsPanel.vue', () => {
       licenseLevel: 1,
       factoryCounts: {},
       fractionalQSOs: 0,
+      tapPrestigeAccumulator: 0n,
       purchasedUpgrades: new Set(),
       lotteryState: {
         lastTriggerTime: 0,
@@ -99,5 +100,19 @@ describe('SettingsPanel.vue', () => {
     await prestigeBtn.trigger('click')
     expect(wrapper.text()).not.toContain('Are you sure? This cannot be undone!')
     expect(wrapper.text()).toContain('Prestige reset will reset your run')
+  })
+
+  it('clears tap prestige remainder on reset', async () => {
+    mockStore({ canPrestigeReset: true, tapPrestigeAccumulator: 42n })
+
+    const wrapper = mount(SettingsPanel)
+
+    const resetBtn = wrapper.findAll('button').filter(b => b.text().includes('⚠️ Reset Game'))[0]
+    await resetBtn.trigger('click')
+
+    const confirmBtn = wrapper.findAll('button').filter(b => b.text().includes('Yes, Reset Everything'))[0]
+    await confirmBtn.trigger('click')
+
+    expect(useGameStore().tapPrestigeAccumulator).toBe(0n)
   })
 })

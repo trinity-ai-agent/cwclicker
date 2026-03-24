@@ -10,6 +10,8 @@ import { UPGRADES } from '../constants/upgrades'
 const GAME_VERSION = '1.1.4'
 const MAX_BULK_PURCHASE_COUNT = 10
 const OVERFLOW_FACTORY_COST = 10n ** 100n
+const PRESTIGE_QSOS_PER_LEVEL = 1_000_000_000n
+const MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER = BigInt(Number.MAX_SAFE_INTEGER)
 
 /**
  * Manages the game's core state and progression.
@@ -74,6 +76,8 @@ export const useGameStore = defineStore('game', () => {
   const fractionalQSOs = ref(0) // Accumulate fractional QSOs between frames
   const tapPrestigeAccumulator = ref(0n) // Accumulates tap prestige bonus in basis points
   const purchasedUpgrades = ref(new Set()) // Set of upgrade IDs that have been purchased
+  let cachedEligiblePrestigeLevel = 0n
+  let cachedEligiblePrestigeThreshold = PRESTIGE_QSOS_PER_LEVEL
 
   // Migration tracking
   const migrationInfo = ref(null) // Stores info about migration for UI display
@@ -124,6 +128,14 @@ export const useGameStore = defineStore('game', () => {
 
   // Offline progress tracking
   const offlineEarnings = ref(null)
+
+  function prestigeThresholdForLevel(level) {
+    if (level <= 0n) {
+      return 0n
+    }
+
+    return PRESTIGE_QSOS_PER_LEVEL * level * level * level
+  }
 
   /**
    * Processes a keyer tap to add QSOs.
@@ -293,17 +305,29 @@ export const useGameStore = defineStore('game', () => {
   }
 
   const eligiblePrestigeLevel = computed(() => {
-    if (totalQsosEarned.value < 1_000_000_000n) {
+    const earned = totalQsosEarned.value
+
+    if (earned < PRESTIGE_QSOS_PER_LEVEL) {
+      cachedEligiblePrestigeLevel = 0n
+      cachedEligiblePrestigeThreshold = PRESTIGE_QSOS_PER_LEVEL
       return 0n
     }
 
-    const normalized = totalQsosEarned.value / 1_000_000_000n
-    return cubeRootFloor(normalized)
+    if (earned < cachedEligiblePrestigeThreshold) {
+      cachedEligiblePrestigeLevel = cubeRootFloor(earned / PRESTIGE_QSOS_PER_LEVEL)
+      cachedEligiblePrestigeThreshold = prestigeThresholdForLevel(cachedEligiblePrestigeLevel + 1n)
+      return cachedEligiblePrestigeLevel
+    }
+
+    while (earned >= cachedEligiblePrestigeThreshold) {
+      cachedEligiblePrestigeLevel += 1n
+      cachedEligiblePrestigeThreshold = prestigeThresholdForLevel(cachedEligiblePrestigeLevel + 1n)
+    }
+
+    return cachedEligiblePrestigeLevel
   })
 
   const canPrestigeReset = computed(() => eligiblePrestigeLevel.value > prestigeLevel.value)
-
-  const MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER = BigInt(Number.MAX_SAFE_INTEGER)
 
   const prestigeMultiplier = computed(() => {
     const safePrestigeLevel = prestigeLevel.value > MAX_PRESTIGE_LEVEL_FOR_MULTIPLIER
@@ -339,6 +363,12 @@ export const useGameStore = defineStore('game', () => {
     }
     migrationInfo.value = null
     save()
+  }
+
+  function setTotalQsosEarned(value) {
+    totalQsosEarned.value = value
+    cachedEligiblePrestigeLevel = 0n
+    cachedEligiblePrestigeThreshold = PRESTIGE_QSOS_PER_LEVEL
   }
 
   function normalizePrestigeState() {
@@ -602,7 +632,7 @@ export const useGameStore = defineStore('game', () => {
         }
 
         qsos.value = parseNonNegativeBigInt(state.qsos || '0')
-        totalQsosEarned.value = parseNonNegativeBigInt(state.totalQsosEarned || state.qsos || '0')
+        setTotalQsosEarned(parseNonNegativeBigInt(state.totalQsosEarned || state.qsos || '0'))
         const hasPrestigeFields = 'prestigeLevel' in state || 'prestigePoints' in state
         prestigeLevel.value = parseNonNegativeBigInt(state.prestigeLevel)
         prestigePoints.value = parseNonNegativeBigInt(state.prestigePoints)
@@ -699,12 +729,21 @@ export const useGameStore = defineStore('game', () => {
       if (factory) {
         const lotteryMultiplier = getLotteryMultiplier(factoryId)
         const upgradeMultiplier = getUpgradeMultiplier(factoryId)
-        total +=
+        const contribution =
           factory.qsosPerSecond * count * lotteryMultiplier * upgradeMultiplier * prestigeMultiplier.value
+
+        if (!Number.isFinite(contribution) || contribution < 0 || contribution > Number.MAX_SAFE_INTEGER) {
+          continue
+        }
+
+        total += contribution
+        if (!Number.isFinite(total) || total > Number.MAX_SAFE_INTEGER) {
+          return 0
+        }
       }
     }
 
-    return total
+    return Number.isFinite(total) && total > 0 && total <= Number.MAX_SAFE_INTEGER ? total : 0
   }
 
   /**

@@ -53,6 +53,19 @@ describe('Game Store', () => {
     expect(store.prestigeMultiplier).toBeCloseTo(1.15)
   })
 
+  it('does not recompute prestige eligibility until earned QSOs cross the next threshold', () => {
+    const store = useGameStore()
+
+    store.totalQsosEarned = 27_000_000_000n
+    store.prestigeLevel = 3n
+
+    const initialEligible = store.eligiblePrestigeLevel
+    store.tapKeyer('dit')
+
+    expect(store.eligiblePrestigeLevel).toBe(initialEligible)
+    expect(store.canPrestigeReset).toBe(false)
+  })
+
   it('applies prestige multiplier to keyer taps with remainder accumulation', () => {
     const store = useGameStore()
 
@@ -118,5 +131,14 @@ describe('Game Store', () => {
     store.totalQsosEarned = 1_000_000_000n * normalized
 
     expect(store.eligiblePrestigeLevel).toBe(root - 1n)
+  })
+
+  it('clamps non-finite passive output to zero', () => {
+    const store = useGameStore()
+
+    store.factoryCounts = { elmer: Number.MAX_SAFE_INTEGER }
+    store.prestigeLevel = 9007199254740991n
+
+    expect(store.getTotalQSOsPerSecond()).toBe(0)
   })
 })

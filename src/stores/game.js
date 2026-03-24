@@ -307,23 +307,13 @@ export const useGameStore = defineStore('game', () => {
   const eligiblePrestigeLevel = computed(() => {
     const earned = totalQsosEarned.value
 
-    if (earned < PRESTIGE_QSOS_PER_LEVEL) {
-      cachedEligiblePrestigeLevel = 0n
-      cachedEligiblePrestigeThreshold = PRESTIGE_QSOS_PER_LEVEL
-      return 0n
-    }
-
     if (earned < cachedEligiblePrestigeThreshold) {
-      cachedEligiblePrestigeLevel = cubeRootFloor(earned / PRESTIGE_QSOS_PER_LEVEL)
-      cachedEligiblePrestigeThreshold = prestigeThresholdForLevel(cachedEligiblePrestigeLevel + 1n)
       return cachedEligiblePrestigeLevel
     }
 
-    while (earned >= cachedEligiblePrestigeThreshold) {
-      cachedEligiblePrestigeLevel += 1n
-      cachedEligiblePrestigeThreshold = prestigeThresholdForLevel(cachedEligiblePrestigeLevel + 1n)
-    }
-
+    const newLevel = cubeRootFloor(earned / PRESTIGE_QSOS_PER_LEVEL)
+    cachedEligiblePrestigeLevel = newLevel
+    cachedEligiblePrestigeThreshold = prestigeThresholdForLevel(newLevel + 1n)
     return cachedEligiblePrestigeLevel
   })
 
@@ -378,6 +368,10 @@ export const useGameStore = defineStore('game', () => {
       prestigeLevel.value = eligibleLevel
       prestigePoints.value = eligibleLevel
     }
+  }
+
+  function getPrestigeThreshold(level) {
+    return prestigeThresholdForLevel(level)
   }
 
   /**
@@ -820,6 +814,7 @@ export const useGameStore = defineStore('game', () => {
     offlineEarnings,
     calculateOfflineProgress,
     dismissOfflineEarnings,
+    getPrestigeThreshold,
     save,
     load,
   }

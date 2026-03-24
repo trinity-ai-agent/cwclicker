@@ -21,6 +21,7 @@ describe('StatHeader.vue', () => {
       prestigePoints: 12n,
       eligiblePrestigeLevel: 12n,
       prestigeMultiplier: 1.6,
+      getPrestigeThreshold: level => 1_000_000_000n * level * level * level,
     })
 
     const wrapper = mount(StatHeader)

@@ -90,20 +90,41 @@ describe('SettingsPanel.vue', () => {
 
     const wrapper = mount(SettingsPanel)
 
-    const resetBtn = wrapper.findAll('button').filter(b => b.text().includes('⚠️ Reset Game'))[0]
-    const prestigeBtn = wrapper.findAll('button').filter(b => b.text().includes('Prestige Reset'))[0]
-
-    await resetBtn.trigger('click')
+    await wrapper.findAll('button').filter(b => b.text().includes('⚠️ Reset Game'))[0].trigger('click')
     expect(wrapper.text()).toContain('Are you sure? This cannot be undone!')
     expect(wrapper.text()).not.toContain('Prestige reset will reset your run')
 
-    await prestigeBtn.trigger('click')
+    await wrapper.findAll('button').filter(b => b.text().includes('Cancel'))[0].trigger('click')
+    const prestigeBtnAfterCancel = wrapper.findAll('button').filter(b => b.text().includes('Prestige Reset'))[0]
+    await prestigeBtnAfterCancel.trigger('click')
     expect(wrapper.text()).not.toContain('Are you sure? This cannot be undone!')
     expect(wrapper.text()).toContain('Prestige reset will reset your run')
   })
 
   it('clears tap prestige remainder on reset', async () => {
-    mockStore({ canPrestigeReset: true, tapPrestigeAccumulator: 42n })
+    const mock = {
+      audioSettings: { volume: 0.5, frequency: 600, isMuted: false },
+      canPrestigeReset: true,
+      prestigeReset: vi.fn(),
+      qsos: 0n,
+      licenseLevel: 1,
+      factoryCounts: {},
+      fractionalQSOs: 0,
+      tapPrestigeAccumulator: 42n,
+      purchasedUpgrades: new Set(),
+      lotteryState: {
+        lastTriggerTime: 0,
+        isBonusAvailable: false,
+        bonusFactoryId: null,
+        bonusEndTime: 0,
+        bonusAvailableEndTime: 0,
+        phenomenonTitle: '',
+        isSolarStorm: false,
+        solarStormEndTime: 0,
+      },
+      save: vi.fn(),
+    }
+    useGameStore.mockReturnValue(mock)
 
     const wrapper = mount(SettingsPanel)
 
@@ -113,6 +134,7 @@ describe('SettingsPanel.vue', () => {
     const confirmBtn = wrapper.findAll('button').filter(b => b.text().includes('Yes, Reset Everything'))[0]
     await confirmBtn.trigger('click')
 
-    expect(useGameStore().tapPrestigeAccumulator).toBe(0n)
+    expect(mock.qsos).toBe(0n)
+    expect(mock.tapPrestigeAccumulator).toBe(0n)
   })
 })
